@@ -71,7 +71,7 @@ head(outdf)
 ```{r}
 outdf %>%
   ggplot(aes(x = Arm.Negative)) +
-  geom_density() +
+  geom_histogram() +
   geom_vline(xintercept = original$Arm.Negative,
              color = "red", 
              linetype = "dashed",
@@ -81,6 +81,25 @@ outdf %>%
 # Calculate p-value
 
 ```{r}
+print("Membrane - Positive")
+sum(outdf$Arm.Positive >= original$Arm.Positive, na.rm = TRUE) / B
+
+print("Membrane - Negative")
 sum(outdf$Arm.Negative >= original$Arm.Negative, na.rm = TRUE) / B
+
+print("Membrane - NA")
+sum(outdf$Arm.NA >= original$Arm.NA, na.rm = TRUE) / B
+
+print("Membrane - Postive")
+sum(outdf$Membrane.Positive >= original$Membrane.Positive, na.rm = TRUE) / B
+
+print("Membrane - Negative")
+sum(outdf$Membrane.Negative >= original$Membrane.Negative, na.rm = TRUE) / B
+
+print("Membrane - NA")
+sum(outdf$Membrane.NA >= original$Membrane.NA, na.rm = TRUE) / B
+
 ```
+
+
 
