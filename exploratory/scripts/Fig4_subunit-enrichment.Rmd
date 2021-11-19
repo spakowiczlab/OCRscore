@@ -1,0 +1,86 @@
+---
+title: "Fig4_subunit-enrichment"
+author: "Dan Spakowicz"
+date: "11/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(tidyverse)
+```
+
+```{r}
+x <- readxl::read_xlsx("../data/Subunit OS 111821.xlsx",
+                       na = "N/A") %>%
+  select(-Note)
+```
+
+```{r}
+x %>%
+  group_by(Arm, `OS outcome`) %>%
+  summarize(n = n())
+
+```
+
+# Hypothesis
+
+>Interestingly, there is a non-random distribution of these subunits (Figure 4A). The proteins whose expression predicts for negative outcome all seem to be on the matrix arm of the complex while most of those predicting positive outcome are within the mitochondrial membrane or intramembranous space (Figure 4A). The matrix arm of complex one contains the N module where NADH donates an electron to ETC (31, 32), and the Q module where ubiquinone binds to accept the electron and pass it on to complex three (33). In the matrix arm, only core proteins S7 and S8 predict for improved patient outcome (Figure 4A). Therefore, one may interpret this asymmetric distribution of subunits to indicate that it is the stimulation of electron production that is the common function of the subunits whose expression predicts for poor patient outcome. A similar rationale may apply for the subunits of complex two, all of which are involved in electron production and all of which predict for poor patient outcome (Figure 4A).
+
+H1: there are significantly more `OS outcome == "Negative"` when `Arm == "Arm"` than would be expected by chance.
+
+H1: most of those predicting `OS outcome == "Positive"` outcome are within the `Arm == "Mitochondrial"` membrane
+
+```{r}
+tallyArms <- function(df) {
+  df %>%
+    group_by(Arm, `OS outcome`) %>%
+    summarize(n = n()) %>%
+    ungroup() %>%
+    mutate(arm.out = paste(Arm, `OS outcome`, sep = ".")) %>%
+    select(arm.out, n) %>%
+    spread(key = arm.out, value = n)
+}
+
+original <- tallyArms(x)
+```
+
+
+```{r}
+B <- 1000
+
+# Pre-allocate memory
+out <- list()
+
+# Randomize the "OS outcome" variable and count
+for(i in 1:B) {
+  y <- 
+    x %>%
+    mutate(`OS outcome2` = sample(`OS outcome`))
+ 
+   out[[i]] <- tallyArms(y)
+}
+
+outdf <- bind_rows(out)
+head(outdf)
+```
+
+
+```{r}
+outdf %>%
+  ggplot(aes(x = Arm.Negative)) +
+  geom_density() +
+  geom_vline(xintercept = original$Arm.Negative,
+             color = "red", 
+             linetype = "dashed",
+             lwd = 2) +
+  theme_bw()
+```
+# Calculate p-value
+
+```{r}
+sum(outdf$Arm.Negative >= original$Arm.Negative, na.rm = TRUE) / B
+```
+
