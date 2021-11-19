@@ -1,0 +1,65 @@
+---
+title: "Fig 3 Buffa and mitochondrial oxygen demand"
+author: "Dan Spakowicz"
+date: "11/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+x <- data.frame(files = list.files("../data/many-cancers/", 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+  
+
+mitophagy.files <- x %>%
+  filter(grepl("MITOPHAGY", files))
+```
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+}
+
+mitophagy <- lapply(X = mitophagy.files$files, readAndFilter) %>%
+  bind_rows()
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+mitophagy.files <- 
+  x %>%
+  filter(grepl("MITOPHAG", files))
+```
+
+```{r}
+etc.files <- 
+  x %>%
+  filter(grepl("ELECTRON", files))
+```
+
+```{r}
+biogen.files <- 
+  x %>%
+  filter(grepl("BIOGEN", files))
+```
