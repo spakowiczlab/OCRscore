@@ -1,0 +1,200 @@
+---
+title: "buffa-mitoscore-comparison"
+author: "Dan Spakowicz"
+date: "11/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggExtra)
+library(gt)
+```
+
+```{r}
+coad <- read.table("../data/many-cancers/MaxLimitsallLogExpr_coadread_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
+  select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+  rownames_to_column("sampleID") %>%
+  mutate(cancer = "coad")
+
+head(coad)
+
+brca <- read.table("../data/many-cancers/MaxLimitsallLogExpr_brca_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
+  select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+  rownames_to_column("sampleID") %>%
+  mutate(cancer = "brca")
+```
+
+```{r}
+brca %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(alpha = 0.2) +
+  theme_bw() +
+  stat_smooth(color = "red", lwd = 2) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore")
+ggsave("../figures/scatterplot_buffa-mito_brca_gam.png",
+       height = 3, width = 5)
+```
+
+```{r}
+brca %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative")) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(group = pos), alpha = 0.2) +
+  theme_bw() +
+  stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 2) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore")
+ggsave("../figures/scatterplot_buffa-mito_brca_split-lm.png",
+       height = 3, width = 5)
+```
+
+```{r}
+comb <- 
+  bind_rows(coad, brca)
+
+
+comb %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative")) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(alpha = 0.1) +
+  theme_bw() +
+  stat_smooth(aes(color = cancer), method = "lm", lwd = 2) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore") +
+  scale_color_manual(values = c("firebrick", "darkblue"))
+ggsave("../figures/scatterplot_buffa-mito_brca+coad_lm.png",
+       height = 3, width = 6)
+```
+
+```{r}
+  comb %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative"),
+        canpos = paste(cancer, pos, sep = ".")
+        ) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(alpha = 0.1) +
+  theme_bw() +
+  geom_smooth(aes(color = canpos), method = "lm", lwd = 2) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore")
+ggsave("../figures/scatterplot_buffa-mito_brca+coad_split-lm.png",
+       height = 3, width = 6)
+```
+
+```{r}
+  comb %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative"),
+        canpos = paste(cancer, pos, sep = ".")
+        ) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(alpha = 0.1) +
+  theme_bw() +
+  geom_smooth(aes(color = canpos), method = "lm", lwd = 2) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore") +
+  facet_wrap(vars(cancer))
+ggsave("../figures/scatterplot_buffa-mito_brca+coad_split-lm_facet.png",
+       height = 3, width = 6)
+```
+
+
+```{r}
+p <- 
+comb %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative"),
+        canpos = paste(cancer, pos, sep = ".")
+        ) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(color = cancer), alpha = 0.1, show.legend = FALSE) +
+  theme_bw() +
+  geom_smooth(aes(color = canpos), method = "lm", lwd = 2) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore")
+  ggMarginal(p, groupFill = TRUE)
+ggsave("../figures/scatterplot_buffa-mito_brca+coad_split-lm_margins.png",
+       height = 3, width = 6)
+```
+
+# Now roll out to all cancers
+
+```{r}
+x <- data.frame(files = list.files("../data/many-cancers/", 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+  
+
+mitoscore.files <- x %>%
+  filter(grepl("OXPHOS", files))
+```
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+}
+
+mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows()
+
+head(mitoscore)
+dim(mitoscore)
+
+mitoscore %>%
+  group_by(cancer) %>%
+  summarize(n = length(cancer)) %>%
+  arrange(-n) %>%
+  gt
+```
+
+```{r}
+mitoscore %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative")) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
+  theme_bw() +
+  stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 1.5) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore")
+ggsave("../figures/scatterplot_buffa-mito_all_split-lm.png",
+       height = 3, width = 5)
+```
+
+```{r}
+mitoscore %>%
+ mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative")) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
+  theme_bw() +
+  stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 1.5) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore") +
+  facet_wrap(~cancer)
+ggsave("../figures/scatterplot_buffa-mito_all_facet_split-lm.png",
+       height = 10, width = 7.5)
+```
+
+
