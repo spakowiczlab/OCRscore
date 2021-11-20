@@ -13,6 +13,7 @@ library(tidyverse)
 library(gt)
 library(ggalt)
 library(ggridges)
+library(forcats)
 
 # Source paths 
 source("00-paths.R")
@@ -86,7 +87,10 @@ mean.buffa <-
   comb %>%
   group_by(cancer) %>%
   summarize(mean = mean(BUFFA_HYPOXIA_SCORE)) %>%
-  mutate(buffa.bin = if_else(mean > 0))
+  mutate(`Buffa Category` = if_else(mean > 0,
+                             true = "HB",
+                             false = "LB")) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
 
 mean.buffa %>%
   gt()
@@ -94,16 +98,16 @@ mean.buffa %>%
 
 ```{r}
 mean.buffa %>%
-  arrange(-mean) %>%
-  ggplot(aes(x = mean, y = reorder(cancer, mean))) +
-  geom_lollipop(aes(point.colour = cancer),
-                horizontal = TRUE, 
-                point.colour = "firebrick",
-                point.size = 3,
-                show.legend = FALSE) +
+  ggplot(aes(x = mean, y = cancer)) +
+  geom_segment(aes(y = cancer, yend = cancer, x = mean, xend = 1), size = .8, alpha = .8) +
+  geom_point(aes(x = mean, y = cancer, fill = `Buffa Category`), shape = 21, size = 6, alpha = .9) +
   theme_bw() +
   labs(x = "Mean Buffa Score",
-       y = "")
+       y = "") +
+  scale_fill_viridis_d()
+
+ggsave("../figures/mean-buffa_lollipop.png",
+       height = 4, width = 6)
 ```
 
 
@@ -111,11 +115,48 @@ mean.buffa %>%
 ```{r}
 cmb <- 
   comb %>%
-  full_join(mean.buffa)
+  full_join(mean.buffa) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
 
-
-comb %>%
+cmb %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = cancer, fill = stat(x))) +
-  geom_density_ridges_gradient(show.legend = FALSE)
+  geom_density_ridges_gradient(show.legend = FALSE) +
+  theme_bw() +
+  labs(x = "Buffa Hypoxia Score",
+       y = "") +
+  scale_fill_viridis_c()
+ggsave("../figures/buffa_density-ridges.png",
+       height = 4, width = 6)
 ```
+
+
+
+```{r}
+cmbl <- 
+  cmb %>%
+  select(-mean) %>%
+  gather(key = "signature", value = "score", 
+         -BUFFA_HYPOXIA_SCORE,
+         -cancer,
+         -pos,
+         -`Buffa Category`,
+         -sampleID)
+
+head(cmbl)
 ```
+
+```{r}
+cmbl %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature)) +
+  facet_wrap(~`Buffa Category`) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/Fig3_hb-lb_3sigs_loess.png",
+       height = 4,
+       width = 6)
+```
+
