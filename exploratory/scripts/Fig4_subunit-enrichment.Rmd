@@ -31,7 +31,7 @@ x %>%
 
 H1: there are significantly more `OS outcome == "Negative"` when `Arm == "Arm"` than would be expected by chance.
 
-H1: most of those predicting `OS outcome == "Positive"` outcome are within the `Arm == "Mitochondrial"` membrane
+H2: most of those predicting `OS outcome == "Positive"` outcome are within the `Arm == "Mitochondrial"` membrane
 
 ```{r}
 tallyArms <- function(df) {
@@ -78,16 +78,18 @@ outdf %>%
              lwd = 2) +
   theme_bw()
 ```
+
+# H1
 # Calculate p-value
 
 ```{r}
-print("Membrane - Positive")
+print("Arm - Positive")
 sum(outdf$Arm.Positive >= original$Arm.Positive, na.rm = TRUE) / B
 
-print("Membrane - Negative")
+print("Arm - Negative")
 sum(outdf$Arm.Negative >= original$Arm.Negative, na.rm = TRUE) / B
 
-print("Membrane - NA")
+print("Arm - NA")
 sum(outdf$Arm.NA >= original$Arm.NA, na.rm = TRUE) / B
 
 print("Membrane - Postive")
@@ -100,6 +102,5 @@ print("Membrane - NA")
 sum(outdf$Membrane.NA >= original$Membrane.NA, na.rm = TRUE) / B
 
 ```
-
 
 
