@@ -7,26 +7,46 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# Load required packages
+library(tidyverse)
+library(gt)
+library(ggalt)
+library(ggridges)
+library(forcats)
+
+# Source paths 
+source("00-paths.R")
 ```
 
-## R Markdown
+Code to create Figure 3 in __"Oxygen demand driven tumor hypoxia: a new perspective on the genesis and treatment of hypoxia"__
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+>__Figure 3. Schematic representation of relationship between hypoxia and mitochondrial oxygen demand.__ _Low mean Buffa score (LB)_ cancers show positive correlation between increasing hypoxia, mitoscore, mitochondrial biogenesis and mitophagy. _High mean Buffa score (HB)_ cancers show a more moderate correlation between hypoxia, mitoscore, and mitochondrial biogenesis with an inverse relationship with mitophagy. Lower slope mitoscore:Buffa score relationship in the more hypoxic tumors corresponds to elevated HIF-1 target gene expression carbonic anhydrase IX (CA9), and pyruvate dehydrogenase kinases 1 and 3 genes.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
-x <- data.frame(files = list.files("../data/many-cancers/", 
-                                   full.names = TRUE)) %>%
+x <- data.frame(files = list.files( file.path(paths$box, 
+                                              "data", 
+                                              "many-cancers"), 
+                                    full.names = TRUE)) %>%
   filter(grepl("\\.txt", files)) %>%
   filter(grepl("MaxLimitsall", files))
-  
+
 
 mitophagy.files <- x %>%
-  filter(grepl("MITOPHAGY", files))
+  filter(grepl("GOBP_MITOPHAGY", files))
+
+biogen.files <- 
+  x %>%
+  filter(grepl("BIOGEN", files))
+
+etc.files <- 
+  x %>%
+  filter(grepl("ELECTRON", files))
 ```
 
 ```{r}
+# Define a function to read in all the files and select columns of interest
 readAndFilter <- function(table) {
   read.table(table) %>%
     select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
@@ -38,28 +58,119 @@ readAndFilter <- function(table) {
 }
 
 mitophagy <- lapply(X = mitophagy.files$files, readAndFilter) %>%
-  bind_rows()
+  bind_rows() %>%
+  rename("Mitophagy" = "AvgExpr")
+
+biogen <- lapply(X = biogen.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  rename("Mitochondrial Biogenesis" = "AvgExpr")
+
+etc <- lapply(X = etc.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  rename("Electron Transport Chain" = "AvgExpr")
+
+comb <- 
+  mitophagy %>%
+  full_join(biogen) %>%
+  full_join(etc) %>%
+  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative"))
+
+dim(comb)
+head(comb)
+```
+There's a concept of low and high mean buffa score cancers. I'll take that at face value for the assignment
+
+```{r}
+mean.buffa <- 
+  comb %>%
+  group_by(cancer) %>%
+  summarize(mean = mean(BUFFA_HYPOXIA_SCORE)) %>%
+  mutate(`Buffa Category` = if_else(mean > 0,
+                             true = "HB",
+                             false = "LB")) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
+
+mean.buffa %>%
+  gt()
+```
+
+```{r}
+mean.buffa %>%
+  ggplot(aes(x = mean, y = cancer)) +
+  geom_segment(aes(y = cancer, yend = cancer, x = mean, xend = 1), size = .8, alpha = .8) +
+  geom_point(aes(x = mean, y = cancer, fill = `Buffa Category`), shape = 21, size = 6, alpha = .9) +
+  theme_bw() +
+  labs(x = "Mean Buffa Score",
+       y = "") +
+  scale_fill_viridis_d()
+
+ggsave("../figures/mean-buffa_lollipop.png",
+       height = 4, width = 6)
 ```
 
 
-## Including Plots
-
-You can also embed plots, for example:
 
 ```{r}
-mitophagy.files <- 
-  x %>%
-  filter(grepl("MITOPHAG", files))
+cmb <- 
+  comb %>%
+  full_join(mean.buffa) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
+
+cmb %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = cancer, fill = stat(x))) +
+  geom_density_ridges_gradient(show.legend = FALSE) +
+  theme_bw() +
+  labs(x = "Buffa Hypoxia Score",
+       y = "") +
+  scale_fill_viridis_c()
+ggsave("../figures/buffa_density-ridges.png",
+       height = 4, width = 6)
+```
+
+
+
+```{r}
+cmbl <- 
+  cmb %>%
+  select(-mean) %>%
+  gather(key = "signature", value = "score", 
+         -BUFFA_HYPOXIA_SCORE,
+         -cancer,
+         -pos,
+         -`Buffa Category`,
+         -sampleID)
+
+head(cmbl)
 ```
 
 ```{r}
-etc.files <- 
-  x %>%
-  filter(grepl("ELECTRON", files))
+cmbl %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature)) +
+  facet_wrap(~`Buffa Category`) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/Fig3_hb-lb_3sigs_loess.png",
+       height = 4,
+       width = 6)
 ```
 
 ```{r}
-biogen.files <- 
-  x %>%
-  filter(grepl("BIOGEN", files))
+cmbl %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature)) +
+  facet_wrap(~ `Buffa Category` + cancer) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet.png",
+       height = 10,
+       width = 7.5)
 ```
