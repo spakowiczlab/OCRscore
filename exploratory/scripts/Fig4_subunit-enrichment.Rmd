@@ -48,7 +48,7 @@ original <- tallyArms(x)
 ```
 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 B <- 1000
 
 # Pre-allocate memory
