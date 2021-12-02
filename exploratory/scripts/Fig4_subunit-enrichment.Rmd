@@ -58,7 +58,7 @@ out <- list()
 for(i in 1:B) {
   y <- 
     x %>%
-    mutate(`OS outcome2` = sample(`OS outcome`))
+    mutate(`OS outcome` = sample(`OS outcome`))
  
    out[[i]] <- tallyArms(y)
 }
@@ -103,4 +103,17 @@ sum(outdf$Membrane.NA >= original$Membrane.NA, na.rm = TRUE) / B
 
 ```
 
+Here's the second version using Martin's updated spreadsheet. 
+
+```{r}
+x2 <- readxl::read_xlsx("../data/Subunit OS 11242021.xlsx")
+
+head(x2)
+```
+
+```{r}
+x2.filt <- 
+  x2 %>%
+  filter(Note != "Mitochondrial genome")
+```
 
