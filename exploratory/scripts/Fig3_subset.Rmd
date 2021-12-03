@@ -7,5 +7,160 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# Load required packages
+library(tidyverse)
+library(gt)
+library(ggalt)
+library(ggridges)
+library(forcats)
+
+# Source paths 
+source("00-paths.R")
 ```
 
+
+```{r}
+x <- data.frame(files = list.files( file.path(paths$box, 
+                                              "data", 
+                                              "many-cancers"), 
+                                    full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+
+#GOBP_MITOPHAGY included the wrong genes
+mitophagy.files <- x %>%
+  filter(grepl("GOBP_and_REACTOME_MITOPHAGY", files))
+
+biogen.files <- 
+  x %>%
+  filter(grepl("BIOGEN", files))
+
+etc.files <- 
+  x %>%
+  filter(grepl("ELECTRON", files))
+```
+
+```{r}
+# Define a function to read in all the files and select columns of interest
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+}
+
+mitophagy <- lapply(X = mitophagy.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  rename("Mitophagy" = "AvgExpr")
+
+biogen <- lapply(X = biogen.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  rename("Mitochondrial Biogenesis" = "AvgExpr")
+
+etc <- lapply(X = etc.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  rename("Electron Transport Chain" = "AvgExpr")
+
+comb <- 
+  mitophagy %>%
+  full_join(biogen) %>%
+  full_join(etc) %>%
+  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative"))
+
+dim(comb)
+head(comb)
+```
+There's a concept of low and high mean buffa score cancers. I'll take that at face value for the assignment
+
+```{r}
+mean.buffa <- 
+  comb %>%
+  group_by(cancer) %>%
+  summarize(mean = mean(BUFFA_HYPOXIA_SCORE)) %>%
+  mutate(`Buffa Category` = if_else(mean > 20,
+                             "HB",
+                             ifelse(mean < -20, 
+                                    "LB",
+                                    "Avg."))) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
+
+mean.buffa %>%
+  gt()
+```
+
+```{r}
+mean.buffa %>%
+  ggplot(aes(x = mean, y = cancer)) +
+  geom_segment(aes(y = cancer, yend = cancer, x = mean, xend = 1), size = .8, alpha = .8) +
+  geom_point(aes(x = mean, y = cancer, fill = `Buffa Category`), shape = 21, size = 6, alpha = .9) +
+  theme_bw() +
+  labs(x = "Mean Buffa Score",
+       y = "") +
+  scale_fill_viridis_d() +
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
+
+ggsave("../figures/mean-buffa_lollipop_SUBSET.png",
+       height = 4, width = 6)
+```
+
+```{r}
+mitoGenes <- read.csv("/Users/wheeler.1017/Documents/GitHub/hypox/exploratory/data/TableS1_signature-gene-sets.csv", skip = 1)
+```
+
+```{r}
+cmb <- 
+  comb %>%
+  full_join(mean.buffa) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
+```
+
+```{r}
+cmbl <- 
+  cmb %>%
+  filter(cmb$`Buffa Category` != "Avg.") %>%
+  select(-mean) %>%
+  gather(key = "signature", value = "score", 
+         -BUFFA_HYPOXIA_SCORE,
+         -cancer,
+         -pos,
+         -`Buffa Category`,
+         -sampleID) 
+
+head(cmbl)
+```
+
+```{r}
+cmbl %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature)) +
+  facet_wrap(~`Buffa Category`) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/Fig3_hb-lb_3sigs_loess_version2.png",
+       height = 4,
+       width = 6)
+```
+
+```{r}
+cmbl %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature)) +
+  facet_wrap(~ `Buffa Category` + cancer) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet_version2.png",
+       height = 10,
+       width = 7.5)
+```

@@ -1,0 +1,52 @@
+---
+title: "Fig 4 version 2"
+author: "Caroline Wheeler"
+date: "12/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(tidyverse)
+```
+
+Here's the second version using Martin's updated spreadsheet. 
+
+read in data
+```{r}
+x2 <- readxl::read_xlsx("../data/Subunit OS 11242021.xlsx")
+
+head(x2)
+```
+
+filter out mitochondrial genome
+```{r}
+x2.filt <- x2 %>%
+  filter(is.na(Note)|Note!="Mitochondrial genome")
+```
+
+```{r}
+x2.filt %>%
+  group_by(Arm, `OS outcome`) %>%
+  summarize(n = n())
+```
+
+New tallyArms funciton with slight edit
+```{r}
+tallyArms2 <- function(df) {
+  df %>%
+    group_by(Arm, `OS outcome`) %>%
+    summarize(n = n()) %>%
+    ungroup() %>%
+    mutate(arm_core = paste(Arm, 'Core/Supernumerary', sep = ".")) %>%
+    mutate(arm.out = paste(Arm, `OS outcome`, sep = ".")) %>%
+    select(arm_core, n) %>%
+    spread(key = arm_core, value = n)
+}
+
+original2 <- tallyArms2(x2.filt)
+```
+
+

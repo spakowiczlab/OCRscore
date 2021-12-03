@@ -52,12 +52,12 @@ filter HB and LB
 ```{r}
 keep <- c("hnsc", "lusc", "cesc", "thca", "prad", "lgg")
 
-mitoscore <- mitoscore %>%
+mitoSub <- mitoscore %>%
   filter(cancer %in% keep)
 ```
 
 ```{r}
-mitoscore %>%
+mitoSub %>%
  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
                       true = "positive",
                       false = "negative")) %>%
@@ -67,11 +67,11 @@ mitoscore %>%
   stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 1.5) +
   labs(x = "Buffa Hypoxia Score",
        y = "mitoscore")
-ggsave("../figures/scatterplot_buffa-mito_all_split-lm.png",
+ggsave("../figures/scatterplot_buffa-mito_all_split-lm_SUBSET.png",
        height = 3, width = 5)
 ```
 ```{r}
-mitoscore %>%
+mitoSub %>%
  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
                       true = "positive",
                       false = "negative")) %>%
@@ -82,6 +82,6 @@ mitoscore %>%
   labs(x = "Buffa Hypoxia Score",
        y = "mitoscore") +
   facet_wrap(~cancer)
-ggsave("../figures/scatterplot_buffa-mito_all_facet_split-lm.png",
+ggsave("../figures/scatterplot_buffa-mito_all_facet_split-lm_SUBSET.png",
        height = 10, width = 7.5)
 ```
