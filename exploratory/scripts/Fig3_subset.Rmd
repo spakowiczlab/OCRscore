@@ -110,7 +110,7 @@ ggsave("../figures/mean-buffa_lollipop_SUBSET.png",
 ```
 
 ```{r}
-mitoGenes <- read.csv("/Users/wheeler.1017/Documents/GitHub/hypox/exploratory/data/TableS1_signature-gene-sets.csv", skip = 1)
+mitoGenes <- read.csv("../data/TableS1_signature-gene-sets.csv", skip = 1)
 ```
 
 ```{r}
@@ -130,7 +130,10 @@ cmbl <-
          -cancer,
          -pos,
          -`Buffa Category`,
-         -sampleID) 
+         -sampleID) %>%
+  mutate(`Buffa Category` = fct_relevel(`Buffa Category`, "LB"),
+         signature = gsub("Electron Transport Chain", "Mitoscore", signature))
+
 
 head(cmbl)
 ```
@@ -142,7 +145,7 @@ cmbl %>%
   geom_smooth(aes(color = signature)) +
   facet_wrap(~`Buffa Category`) +
   labs(x = "Buffa Hypoxia Score",
-       y = "Mitochondrial Oxygen Demand") +
+       y = expression(paste("Average ", Log[2], " Expression", sep = ""))) +
   theme_bw() +
   scale_color_viridis_d()
 ggsave("../figures/Fig3_hb-lb_3sigs_loess_version2.png",
