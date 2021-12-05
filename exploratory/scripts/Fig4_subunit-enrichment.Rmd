@@ -121,6 +121,7 @@ x2.filt %>%
   group_by(Arm, `OS outcome`) %>%
   summarize(n = n())
 ```
+
 ```{r}
 original2 <- tallyArms(x2.filt)
 ```
@@ -177,3 +178,31 @@ print("Membrane - NA")
 sum(outdf2$`Membrane.N/A` >= original2$`Membrane.N/A`, na.rm = TRUE) / B
 
 ```
+
+```{r}
+x2.newcat <- 
+  x2 %>%
+  mutate(arm_core = paste(Arm, `Core/Supernumerary`, sep = "."))
+
+x2.newcat
+```
+
+```{r, message=FALSE, warning=FALSE}
+B <- 1000
+
+# Pre-allocate memory
+out2 <- list()
+
+# Randomize the "OS outcome" variable and count
+for(i in 1:B) {
+  y2 <- 
+    x2 %>%
+    mutate(`OS outcome` = sample(`OS outcome`))
+ 
+   out2[[i]] <- tallyArms(y2)
+}
+
+outdf2 <- bind_rows(out2)
+head(outdf2)
+```
+

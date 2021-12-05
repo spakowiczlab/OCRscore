@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(readxl)
 library(tidyverse)
+library(flextable)
 ```
 
 Here's the second version using Martin's updated spreadsheet. 
@@ -21,15 +22,16 @@ x2 <- readxl::read_xlsx("../data/Subunit OS 11242021.xlsx")
 head(x2)
 ```
 
-filter out mitochondrial genome
+filter out mitochondrial genome and make new category
 ```{r}
 x2.filt <- x2 %>%
-  filter(is.na(Note)|Note!="Mitochondrial genome")
+  mutate(arm_core = paste(Arm, `Core/Supernumerary`, sep = ".")) %>%
+  filter(is.na(Note)|Note!="Mitochondrial genome") 
 ```
 
 ```{r}
 x2.filt %>%
-  group_by(Arm, `OS outcome`) %>%
+  group_by(arm_core, `OS outcome`) %>%
   summarize(n = n())
 ```
 
@@ -43,10 +45,68 @@ tallyArms2 <- function(df) {
     mutate(arm_core = paste(Arm, 'Core/Supernumerary', sep = ".")) %>%
     mutate(arm.out = paste(Arm, `OS outcome`, sep = ".")) %>%
     select(arm_core, n) %>%
-    spread(key = arm_core, value = n)
+    spread(key = "arm_core", value = "n")
 }
 
 original2 <- tallyArms2(x2.filt)
 ```
 
+```{r}
+tallyArms2 <- function(df) {
+  df %>%
+    group_by(arm_core, `OS outcome`) %>%
+    summarize(n = n()) %>%
+    ungroup() %>%
+    mutate(arm.out = paste(arm_core, `OS outcome`, sep = ".")) %>%
+    select(arm.out, n) %>%
+    spread(key = "arm.out", value = "n")
+}
+
+original2 <- tallyArms2(x2.filt)
+```
+
+```{r}
+B <- 1000
+
+# Pre-allocate memory
+out2 <- list()
+
+# Randomize the "OS outcome" variable and count
+for(i in 1:B) {
+  y2 <- 
+    x2.filt %>%
+    mutate(`OS outcome` = sample(`OS outcome`))
+ 
+   out2[[i]] <- tallyArms2(y2)
+}
+
+outdf2 <- bind_rows(out2)
+head(outdf2)
+```
+
+```{r}
+outdf2 %>%
+  ggplot(aes(x = Arm.Core.Negative)) +
+  geom_histogram() +
+  geom_vline(xintercept = original2$Arm.Core.Negative,
+             color = "red", 
+             linetype = "dashed",
+             lwd = 2) +
+  theme_bw()
+```
+
+```{r}
+o2long <- 
+  original2 %>%
+  gather(key = "group", value = "measured")
+
+fig4.ps <- 
+  outdf2 %>%
+  gather(key = "group", value = "random.count") %>%
+  full_join(o2long) %>%
+  group_by(group) %>%
+  summarize("p-value" = sum(random.count >= measured, na.rm = TRUE) / B)
+
+flextable(fig4.ps)
+```
 
