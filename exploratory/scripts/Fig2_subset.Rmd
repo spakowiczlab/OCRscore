@@ -11,10 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggExtra)
 library(gt)
+
+source("00-paths.R")
 ```
 
 ```{r}
-x <- data.frame(files = list.files("/Users/wheeler.1017/Box/hypox/data/many-cancers/", 
+x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
                                    full.names = TRUE)) %>%
   filter(grepl("\\.txt", files)) %>%
   filter(grepl("MaxLimitsall", files))
@@ -70,6 +72,7 @@ mitoSub %>%
 ggsave("../figures/scatterplot_buffa-mito_all_split-lm_SUBSET.png",
        height = 3, width = 5)
 ```
+
 ```{r}
 mitoSub %>%
  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
