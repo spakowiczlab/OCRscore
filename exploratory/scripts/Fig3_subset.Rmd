@@ -138,20 +138,6 @@ cmbl <-
 head(cmbl)
 ```
 
-```{r}
-cmbl %>%
-  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
-  geom_point(color = "grey", alpha = 0.2) +
-  geom_smooth(aes(color = signature)) +
-  facet_wrap(~`Buffa Category`) +
-  labs(x = "Buffa Hypoxia Score",
-       y = expression(paste("Average ", Log[2], " Expression", sep = ""))) +
-  theme_bw() +
-  scale_color_viridis_d()
-ggsave("../figures/Fig3_hb-lb_3sigs_loess_version2.png",
-       height = 4,
-       width = 6)
-```
 
 ```{r}
 cmbl %>%
@@ -173,13 +159,13 @@ ggsave("../figures/Fig3_hb-lb_3sigs_lm_version2.png",
 cmbl %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
   geom_point(color = "grey", alpha = 0.2) +
-  geom_smooth(aes(color = signature)) +
+  geom_smooth(aes(color = signature), method = "lm") +
   facet_wrap(~ `Buffa Category` + cancer) +
   labs(x = "Buffa Hypoxia Score",
        y = "Mitochondrial Oxygen Demand") +
   theme_bw() +
   scale_color_viridis_d()
-ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet_version2.png",
-       height = 10,
+ggsave("../figures/SuppFig2_hb-lb_3sigs_loess_facet_version2.png",
+       height = 6,
        width = 7.5)
 ```
