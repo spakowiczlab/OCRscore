@@ -1,0 +1,97 @@
+---
+title: "fig 4 filtered to arm"
+author: "Caroline Wheeler"
+date: "12/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(tidyverse)
+```
+
+```{r}
+x <- readxl::read_xlsx("../data/Subunit OS 12122021.xlsx",
+                       na = "N/A") %>%
+  select(-Note)
+```
+
+filter arm
+```{r}
+x <- x %>% filter(Arm == "Arm")
+```
+
+
+```{r}
+x %>%
+  group_by(`N/Q`, `OS outcome`) %>%
+  summarize(n = n())
+```
+
+```{r}
+tallyArms <- function(df) {
+  df %>%
+    group_by(`N/Q`, `OS outcome`) %>%
+    summarize(n = n()) %>%
+    ungroup() %>%
+    mutate(core.out = paste(`N/Q`, `OS outcome`, sep = ".")) %>%
+    select(core.out, n) %>%
+    spread(key = core.out, value = n)
+}
+
+original <- tallyArms(x)
+```
+
+```{r, message=FALSE, warning=FALSE}
+B <- 1000
+
+# Pre-allocate memory
+out <- list()
+
+# Randomize the "OS outcome" variable and count
+for(i in 1:B) {
+  y <- 
+    x %>%
+    mutate(`OS outcome` = sample(`OS outcome`))
+ 
+   out[[i]] <- tallyArms(y)
+}
+
+outdf <- bind_rows(out)
+head(outdf)
+```
+
+print results
+```{r}
+testAndPrint <- function(colnames(df)){
+  for (x in ids) {
+    print(x)
+  }
+}
+```
+
+
+```{r}
+# testAndPrint(original)
+
+# print("N - Positive")
+# sum(outdf$N.Positive >= original na.rm = TRUE) / B
+
+print("N - Negative")
+sum(outdf$N.Negative >= original$N.Negative, na.rm = TRUE) / B
+
+print("N - NA")
+sum(outdf$N.NA>= original$N.NA, na.rm = TRUE) / B
+
+print("Q - Postive")
+sum(outdf$Q.Positive>= original$Q.Positive, na.rm = TRUE) / B
+
+print("Q - Negative")
+sum(outdf$Q.Negative >= original$Q.Negative, na.rm = TRUE) / B
+
+print("Q - NA")
+sum(outdf$Q.NA >= original$Q.NA, na.rm = TRUE) / B
+
+```
