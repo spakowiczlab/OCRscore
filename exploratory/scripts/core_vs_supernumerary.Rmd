@@ -1,0 +1,82 @@
+---
+title: "core vs supernumerary"
+author: "Caroline Wheeler"
+date: "12/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(tidyverse)
+```
+
+```{r}
+x <- readxl::read_xlsx("../data/Subunit OS 11242021.xlsx",
+                       na = "N/A") %>%
+  select(-Note)
+```
+
+```{r}
+x %>%
+  group_by(`Core/Supernumerary`, `OS outcome`) %>%
+  summarize(n = n())
+```
+
+```{r}
+tallyArms <- function(df) {
+  df %>%
+    group_by(`Core/Supernumerary`, `OS outcome`) %>%
+    summarize(n = n()) %>%
+    ungroup() %>%
+    mutate(core.out = paste(`Core/Supernumerary`, `OS outcome`, sep = ".")) %>%
+    select(core.out, n) %>%
+    spread(key = core.out, value = n)
+}
+
+original <- tallyArms(x)
+```
+
+```{r, message=FALSE, warning=FALSE}
+B <- 1000
+
+# Pre-allocate memory
+out <- list()
+
+# Randomize the "OS outcome" variable and count
+for(i in 1:B) {
+  y <- 
+    x %>%
+    mutate(`OS outcome` = sample(`OS outcome`))
+ 
+   out[[i]] <- tallyArms(y)
+}
+
+outdf <- bind_rows(out)
+head(outdf)
+```
+
+```{r}
+
+
+
+print("Core - Positive")
+sum(outdf$Core.Positive >= original$Core.Positive, na.rm = TRUE) / B
+
+print("Core - Negative")
+sum(outdf$Core.Negative >= original$Core.Negative, na.rm = TRUE) / B
+
+print("Core - NA")
+sum(outdf$Core.NA>= original$Core.NA, na.rm = TRUE) / B
+
+print("Supernumerary - Postive")
+sum(outdf$Supernumerary.Positive>= original$Supernumerary.Positive, na.rm = TRUE) / B
+
+print("Supernumerary - Negative")
+sum(outdf$Supernumerary.Negative >= original$Supernumerary.Negative, na.rm = TRUE) / B
+
+print("Supernumerary - NA")
+sum(outdf$Supernumerary.NA >= original$Supernumerary.NA, na.rm = TRUE) / B
+
+```
