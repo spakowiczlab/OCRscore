@@ -1,0 +1,76 @@
+---
+title: "Buffa and interesting genes"
+author: "Rebecca Hoyd"
+date: "12/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(ggplot2)
+library(annotate)
+library(org.Hs.eg.db)
+```
+
+
+# Load all data
+
+```{r}
+proj.dir <- "/fs/ess/PAS1695/projects/mitoscore"
+split.dirs <- list.files(proj.dir)
+cnames <- gsub("_.*", "", split.dirs)
+names(split.dirs) <- cnames
+
+list.files(file.path(proj.dir, split.dirs[1]))
+
+hypox.df <- lapply(cnames, function(x) read.table(file.path(proj.dir, split.dirs[[x]],
+                                                                  "data_clinical_supp_hypoxia.txt"),
+                                                        header = T) %>%
+                       mutate(cancer = x)) %>%
+  bind_rows()
+
+entrez.df <- lapply(cnames, function(x) read.table(file.path(proj.dir, split.dirs[[x]],
+                                                              "data_RNA_Seq_v2_expression_median.txt"),
+                                                        header = T, sep = "\t")) 
+```
+
+# Gene formatting
+
+```{r}
+genes.provided <- c("PDHK1", "PDhK3", "mir210", "NDUFA4L2")
+genes.aspresent <- c("PDK1", "PDK3", "NDUFA4L2")
+```
+
+```{r}
+entrez.red <- lapply(entrez.df, function(x) x %>% 
+                       dplyr::filter(Hugo_Symbol %in% genes.aspresent) %>%
+                       dplyr::select(-Entrez_Gene_Id) %>%
+                       gather(-Hugo_Symbol, key = "PATIENT_ID", value = "genecount")) %>%
+  bind_rows()
+```
+
+# Plot formatting
+
+```{r}
+plot.in <- entrez.red %>%
+  mutate(PATIENT_ID = gsub("\\.", "-", gsub("\\.01", "", PATIENT_ID))) %>%
+  left_join(hypox.df)
+```
+
+# Plot
+
+```{r}
+plot.in %>%
+  mutate(logcounts = log(genecount, 2),
+         buffa.bin = ifelse(BUFFA_HYPOXIA_SCORE > 0, 1, 0)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = logcounts, group = buffa.bin ))+
+  facet_wrap(vars(Hugo_Symbol)) + 
+  geom_point(alpha = .3, color = "grey50") +
+  stat_smooth(method = "lm") +
+  labs(x = "Buffa hypoxia score", y = "log2(expression)") +
+  theme_bw()
+
+ggsave("../figures/correlate_buffa-against-mitochondrial.png")
+```
