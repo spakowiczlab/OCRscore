@@ -111,6 +111,11 @@ ggsave("../figures/mean-buffa_lollipop_SUBSET.png",
 ```
 
 ```{r}
+corder <- levels(mean.buffa$cancer)
+saveRDS(corder, "../data/order-cancers-lollipop.RDS")
+```
+
+```{r}
 mitoGenes <- read.csv("../data/TableS1_signature-gene-sets.csv", skip = 1)
 ```
 

@@ -132,7 +132,8 @@ ggsave("../figures/scatterplot_buffa-mito_brca+coad_split-lm_margins.png",
 # Now roll out to all cancers
 
 ```{r}
-x <- data.frame(files = list.files("../data/many-cancers/", 
+# RH altered read path to match box
+x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
                                    full.names = TRUE)) %>%
   filter(grepl("\\.txt", files)) %>%
   filter(grepl("MaxLimitsall", files))
@@ -181,18 +182,50 @@ ggsave("../figures/scatterplot_buffa-mito_all_split-lm.png",
        height = 3, width = 5)
 ```
 
+# RH lm formatting + tweaked plot
+
 ```{r}
+library(broom)
+corder <- readRDS("../data/order-cancers-lollipop.RDS")
+
+lm.res <- list()
+for(x in  corder){
+  tmp <- mitoscore %>%
+    filter(cancer == x)
+  
+  lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
+  
+  rsqr <- summary(lm.mod)$r.squared
+  pval <- lm.mod$coefficients[2]
+  lm.res[[x]] <- as.data.frame(cbind(R.Squared = rsqr, p.value = pval, cancer = x))
+
+}
+
+lm.res.df <- bind_rows(lm.res) %>%
+  mutate(BUFFA_HYPOXIA_SCORE = 25, AvgExpr = 13,
+         Cancer = toupper(cancer),
+         p.value = as.numeric(p.value)) %>%
+  filter(cancer != "kirc")
+```
+
+
+```{r}
+CORDER <- toupper(subset(corder, corder != "kirc"))
 mitoscore %>%
+  filter(cancer != "kirc") %>%
  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
                       true = "positive",
-                      false = "negative")) %>%
+                      false = "negative"),
+        Cancer = toupper(cancer)) %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
   geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
+  geom_label(data = lm.res.df, aes(label = R.Squared, fill = p.value)) +
   theme_bw() +
-  stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 1.5) +
+  stat_smooth(aes(group = 1), method = "lm", color = "red", lwd = 1.5) +
   labs(x = "Buffa Hypoxia Score",
        y = "mitoscore") +
-  facet_wrap(~cancer)
+  facet_wrap(vars(fct_relevel(Cancer, CORDER)), ncol = 3) +
+  scale_fill_distiller()
 ggsave("../figures/scatterplot_buffa-mito_all_facet_split-lm.png",
        height = 10, width = 7.5)
 ```
