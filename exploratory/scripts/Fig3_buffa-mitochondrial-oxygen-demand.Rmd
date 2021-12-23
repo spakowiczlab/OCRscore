@@ -75,10 +75,15 @@ etc <- lapply(X = etc.files$files, readAndFilter) %>%
   bind_rows() %>%
   rename("Electron Transport Chain" = "AvgExpr")
 
+comb <- 
+  mitophagy %>%
+  full_join(biogen) %>%
+  full_join(etc) %>%
+  mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative"),
+         cancer = toupper(cancer))
 
-
-dim(comb)
-head(comb)
 ```
 There's a concept of low and high mean buffa score cancers. I'll take that at face value for the assignment
 
@@ -176,8 +181,6 @@ ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet.png",
 ```
 
 ```{r}
-comb%>%
-  left_join(mean.buffa)
 
 comb.o <- 
   comb %>%
