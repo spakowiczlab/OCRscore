@@ -8,10 +8,12 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+library(tidyverse)
 library(dplyr)
 library(ggplot2)
 library(annotate)
 library(org.Hs.eg.db)
+library(RColorBrewer)
 ```
 
 
@@ -58,6 +60,12 @@ plot.in <- entrez.red %>%
   mutate(PATIENT_ID = gsub("\\.", "-", gsub("\\.01", "", PATIENT_ID))) %>%
   left_join(hypox.df)
 ```
+# Save data objet for work off the cluster
+
+```{r}
+#saveRDS(plot.in, "../data/oxic-induced-genes.RDS")
+```
+
 
 # Plot
 
@@ -73,4 +81,50 @@ plot.in %>%
   theme_bw()
 
 ggsave("../figures/correlate_buffa-against-mitochondrial.png")
+```
+
+```{r}
+plot.in %>%
+  filter(cancer != "kirc") %>%
+  mutate(logcounts = log(genecount, 2),
+         buffa.bin = ifelse(BUFFA_HYPOXIA_SCORE > 0, 1, 0)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = logcounts, group = buffa.bin ))+
+  facet_wrap(vars(Hugo_Symbol)) + 
+  geom_point(alpha = .3, color = "grey50") +
+  stat_smooth(method = "lm", color = "red") +
+  labs(x = "Buffa hypoxia score", y = "log2(expression)") +
+  theme_bw()
+
+ggsave("../figures/correlate_buffa-against-mitochondrial_no-kirc.png")
+```
+
+# Try no break, color by cancer
+
+```{r}
+plot.in %>%
+  mutate(logcounts = log(genecount, 2),
+         buffa.bin = ifelse(BUFFA_HYPOXIA_SCORE > 0, 1, 0)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = logcounts))+
+  facet_wrap(vars(Hugo_Symbol)) + 
+  geom_point(alpha = .3, aes(color = cancer)) +
+  stat_smooth(method = "lm") +
+  labs(x = "Buffa hypoxia score", y = "log2(expression)") +
+  theme_bw() 
+ggsave("../figures/correlate_buffa-against-mitochondrial_no-break.png")
+```
+
+# Remove KIRC
+
+```{r}
+plot.in %>%
+  filter(cancer != "kirc") %>%
+  mutate(logcounts = log(genecount, 2),
+         buffa.bin = ifelse(BUFFA_HYPOXIA_SCORE > 0, 1, 0)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = logcounts))+
+  facet_wrap(vars(Hugo_Symbol)) + 
+  geom_point(alpha = .3, aes(color = cancer)) +
+  stat_smooth(method = "lm") +
+  labs(x = "Buffa hypoxia score", y = "log2(expression)") +
+  theme_bw() 
+ggsave("../figures/correlate_buffa-against-mitochondrial_no-break_no-kirc.png")
 ```
