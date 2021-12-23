@@ -11,19 +11,21 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggExtra)
 library(gt)
+library(viridis)
+library(ggtext)
 
 source("00-paths.R")
 ```
 
 ```{r}
-coad <- read.table(file.path(paths$box, "data", "many-cancers", "MaxLimitsallLogExpr_coadread_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
+coad <- read.table(file.path(paths$box, "data", "many-cancers", "MaxLimitsallLogExpr_coadread_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt")) %>%
   select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
   rownames_to_column("sampleID") %>%
   mutate(cancer = "coad")
 
 head(coad)
 
-brca <- read.table(file.path(paths$box, "data", "many-cancers",MaxLimitsallLogExpr_brca_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
+brca <- read.table(file.path(paths$box, "data", "many-cancers", "MaxLimitsallLogExpr_brca_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt")) %>%
   select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
   rownames_to_column("sampleID") %>%
   mutate(cancer = "brca")
@@ -154,6 +156,7 @@ readAndFilter <- function(table) {
     mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
                          replacement = "\\1",
                          x = cancer))
+           # cancer = toupper(cancer)) 
 }
 
 mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
@@ -191,22 +194,25 @@ library(broom)
 corder <- readRDS("../data/order-cancers-lollipop.RDS")
 
 lm.res <- list()
-for(x in  corder){
+for(x in corder){
   tmp <- mitoscore %>%
     filter(cancer == x)
   
   lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
   
-  rsqr <- summary(lm.mod)$r.squared
-  pval <- lm.mod$coefficients[2]
+  sum.mod <- summary(lm.mod)
+  rsqr <- sum.mod$r.squared
+  pval <- sum.mod$coefficients[8]
   lm.res[[x]] <- as.data.frame(cbind(R.Squared = rsqr, p.value = pval, cancer = x))
 
 }
 
 lm.res.df <- bind_rows(lm.res) %>%
-  mutate(BUFFA_HYPOXIA_SCORE = 25, AvgExpr = 13,
+  mutate(BUFFA_HYPOXIA_SCORE = 25, AvgExpr = 12,
          Cancer = toupper(cancer),
-         p.value = as.numeric(p.value)) %>%
+         p.value = as.numeric(p.value),
+         R.Squared.2 = round(as.numeric(R.Squared), 2),
+         Rsq.label = paste0("R<sup>2</sup> = ", R.Squared.2)) %>%
   filter(cancer != "kirc")
 ```
 
@@ -221,18 +227,24 @@ mitoscore %>%
         Cancer = toupper(cancer)) %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
   geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
-  geom_label(data = lm.res.df, aes(label = R.Squared, fill = p.value)) +
+  geom_richtext(data = lm.res.df, 
+             aes(label = Rsq.label,
+                 fill = p.value),
+             color = "white"
+             ) +
   theme_bw() +
   stat_smooth(aes(group = 1), method = "lm", color = "red", lwd = 1.5) +
   labs(x = "Buffa Hypoxia Score",
        y = "mitoscore") +
   facet_wrap(vars(fct_relevel(Cancer, CORDER)), ncol = 3) +
-  scale_fill_distiller()
+  scale_fill_viridis(option = "magma", 
+                     limits = c(min(lm.res.df$p.value), 0.05)) +
+  labs(fill = "P-value")
 ggsave("../figures/scatterplot_buffa-mito_all_facet_split-lm.png",
-       height = 10, width = 7.5)
+       height = 7, width = 5.75)
+ggsave("../figures/scatterplot_buffa-mito_all_facet_split-lm.svg",
+       height = 7, width = 5.75)
+
 ```
-
-
-
 
 
