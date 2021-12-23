@@ -1,0 +1,114 @@
+---
+title: "raincloud-tcga-buffa"
+author: "Dan Spakowicz"
+date: "12/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Retrieve file names
+```{r}
+x <- data.frame(files = list.files( file.path(paths$box, 
+                                              "data", 
+                                              "many-cancers"), 
+                                    full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+
+
+mitophagy.files <- x %>%
+  filter(grepl("GOBP_MITOPHAGY", files))
+```
+
+# Create dataframe of the Buffa Scores for all cancers
+
+```{r}
+# Define a function to read in all the files and select columns of interest
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer)
+           )
+}
+
+comb <- lapply(X = mitophagy.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  rename("Mitophagy" = "AvgExpr") %>%
+  mutate(cancer = toupper(cancer)) %>%
+  filter(cancer != "KIRC")
+
+```
+
+# Calculate the mean buffa for ordering purposes
+
+```{r}
+mean.buffa <- 
+  comb %>%
+  group_by(cancer) %>%
+  summarize(mean = mean(BUFFA_HYPOXIA_SCORE)) %>%
+  mutate(`Buffa Category` = if_else(mean > 0,
+                             true = "HB",
+                             false = "LB")) %>%
+  mutate(cancer = fct_reorder(cancer, mean))
+
+mean.buffa %>%
+  gt()
+```
+
+
+
+```{r}
+comb.ord <- 
+  comb %>%
+  left_join(mean.buffa) %>%
+  mutate(cancer = fct_reorder(cancer, -mean))
+
+comb.ord %>%
+  ggplot(aes(y = BUFFA_HYPOXIA_SCORE, x = cancer)) +
+  gghalves::geom_half_point(
+    aes(color = cancer),
+    range_scale = .4, 
+    ## add some transparency
+    alpha = .3,
+    side = "l",
+    show.legend = FALSE
+  ) +
+  gghalves::geom_half_boxplot(
+    aes(
+      # color = cancer,
+      color = cancer,
+    ),
+    side = "l",
+    width = 0.3,
+    show.legend = FALSE
+  ) +
+  ggdist::stat_halfeye(
+    aes(
+      color = cancer,
+      fill = after_scale(lighten(color, .5))
+    ),
+    shape = 18,
+    point_size = 3,
+    interval_size = 1.8,
+    adjust = .5,
+    .width = c(0, 1),
+    show.legend = FALSE
+  ) +
+  theme_bw() +
+  coord_flip() +
+  scale_color_viridis_d() +
+  labs(y = "Buffa Hypoxia Score",
+       x = "")
+ggsave("../figures/buffa-cancer-raincloud.png",
+       height = 7, width = 5)
+ggsave("../figures/buffa-cancer-raincloud.svg",
+       height = 7, width = 5)
+```
+
