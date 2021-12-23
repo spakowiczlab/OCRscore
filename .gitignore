@@ -39,7 +39,7 @@ vignettes/*.pdf
 .Renviron
 
 # Paths files
-hypox.json
+mitoscore.json
 exploratory/scripts/00-paths.R
 00-paths.R
 
