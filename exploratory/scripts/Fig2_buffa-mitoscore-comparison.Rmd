@@ -11,17 +11,19 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggExtra)
 library(gt)
+
+source("00-paths.R")
 ```
 
 ```{r}
-coad <- read.table("../data/many-cancers/MaxLimitsallLogExpr_coadread_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
+coad <- read.table(file.path(paths$box, "data", "many-cancers", "MaxLimitsallLogExpr_coadread_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
   select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
   rownames_to_column("sampleID") %>%
   mutate(cancer = "coad")
 
 head(coad)
 
-brca <- read.table("../data/many-cancers/MaxLimitsallLogExpr_brca_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
+brca <- read.table(file.path(paths$box, "data", "many-cancers",MaxLimitsallLogExpr_brca_AverageGeneExpr_vs_BUFFA_CorrelationScatterPlot_WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA.txt") %>%
   select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
   rownames_to_column("sampleID") %>%
   mutate(cancer = "brca")
