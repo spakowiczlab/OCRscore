@@ -72,7 +72,8 @@ comb <-
   full_join(etc) %>%
   mutate(pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
                       true = "positive",
-                      false = "negative"))
+                      false = "negative"),
+         cancer = toupper(cancer))
 
 dim(comb)
 head(comb)
@@ -176,34 +177,5 @@ ggsave("../figures/SuppFig2_hb-lb_3sigs_loess_facet_version2.png",
        width = 7.5)
 ```
 
-
-# Raincloud plot
-
-```{r}
-comb %>%
-
-  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = cancer)) +
-  ggdist::stat_halfeye(
-    adjust = .5, 
-    width = .5, 
-    .width = 0, 
-    justification = -.3, 
-    point_colour = NA) +
-  geom_boxplot(
-    width = .25, 
-    outlier.shape = NA
-  ) +
-  geom_point(
-    size = 1,
-    alpha = .3,
-    position = position_jitter(
-      seed = 1, width = 0.1
-    )
-  ) +
-  theme_bw() 
-ggsave("../figures/cancer-buffa_raincloud.png",
-       height = 8, width = 7)
-  coord_cartesian(xlim = c(1.2, NA), clip = "off")
-```
 
 
