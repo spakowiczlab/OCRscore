@@ -1,0 +1,101 @@
+---
+title: "mir210-corr-with-Buffa"
+author: "Dan Spakowicz"
+date: "1/4/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(devtools)
+install_github("spakowiczlab/tmesig")
+
+source("00-paths.R")
+```
+
+```{r}
+x <- read.table(file = "../data/mRNA expression (FPKM_UQ).txt",
+                na = "NA",
+                header = TRUE)
+
+head(x)
+```
+
+```{r}
+y <- 
+  x %>%
+  filter(!is.na(MIR.210.5P))
+
+dim(y)
+```
+
+```{r}
+head(y)
+```
+
+
+```{r}
+y %>%
+  ggplot(aes(x = MIR.210.5P)) +
+  geom_histogram() +
+  theme_bw()
+```
+
+
+```{r}
+summary(y$MIR.210.5P)
+```
+
+```{r}
+y %>%
+  ggplot(aes(x = log(MIR.210.5P+1))) +
+  geom_histogram() +
+  theme_bw()
+
+ggsave("../figures/mir210-histogram.png",
+       height = 3, width = 4)
+```
+
+```{r}
+table(y$STUDY_ID)
+```
+
+```{r}
+pcawg.files <- list.files(file.path(paths$box, "data", "pancan_pcawg_2020"), 
+                          full.names = TRUE)
+
+pcawg.files
+```
+
+```{r}
+mirna <- read.table(pcawg.files[grep("data_mirna.txt", pcawg.files)],
+                    header = TRUE) 
+
+head(mirna)
+```
+
+
+```{r}
+pm <- 
+  mirna %>%
+  gather(-Hugo_Symbol, key = "sampleID", value = "FPKM") %>%
+  spread(key = Hugo_Symbol, value = FPKM)
+
+pm %>%
+  select(contains("mir-210")) %>%
+  gather(key = "miR", value = "FPKM") %>%
+  ggplot(aes(x = log(FPKM+1))) +
+  geom_histogram(aes(fill = miR)) +
+  theme_bw() 
+
+ggsave("../figures/pcawg_mir210_histogram.png",
+       height = 3, width = 4)
+```
+
+```{r}
+rna <- mirna <- read.table(pcawg.files[grep("data_mrna_seq_fpkm.txt", pcawg.files)],
+                    header = TRUE) 
+```
+
