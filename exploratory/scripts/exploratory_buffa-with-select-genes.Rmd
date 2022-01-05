@@ -49,7 +49,7 @@ genes.aspresent <- c("PDK1", "PDK3", "NDUFA4L2")
 entrez.red <- lapply(entrez.df, function(x) x %>% 
                        dplyr::filter(Hugo_Symbol %in% genes.aspresent) %>%
                        dplyr::select(-Entrez_Gene_Id) %>%
-                       gather(-Hugo_Symbol, key = "PATIENT_ID", value = "genecount")) %>%
+                       tidyr::gather(-Hugo_Symbol, key = "PATIENT_ID", value = "genecount")) %>%
   bind_rows()
 ```
 
@@ -138,12 +138,12 @@ plot.in %>%
   mutate(logcounts = log(genecount, 2),
          buffa.bin = ifelse(BUFFA_HYPOXIA_SCORE > 0, 1, 0)) %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = logcounts))+
-  facet_wrap(vars(Hugo_Symbol, cancer), ncol = 3) + 
+  facet_wrap(vars(cancer, Hugo_Symbol), ncol = 3) + 
   geom_point(alpha = .3, aes(color = cancer)) +
   stat_smooth(method = "lm") +
   labs(x = "Buffa hypoxia score", y = "log2(expression)") +
   theme_bw() 
 ggsave("../figures/correlate_buffa-against-mitochondrial_facet.png",
-       height = 20, width = 20)
+       height = 30, width = 10)
 ```
 
