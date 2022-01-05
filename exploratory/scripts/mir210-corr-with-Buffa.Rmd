@@ -108,13 +108,32 @@ rna <-
 
 # Use desired tables for correlation
 
+```{r check for samples from KIRC that should be excluded}
+clin <- read.table(pcawg.files[grep("data_clinical_sample.txt", pcawg.files)],
+                   sep = "\t", header = T)
+
+table(clin$ORGAN_SYSTEM)
+
+clin.possbad <- clin %>%
+  filter(ORGAN_SYSTEM == "KIDNEY")
+
+clin.possbad %>%
+  mutate(HISTOLOGY = as.character(HISTOLOGY)) %>%
+  group_by(HISTOLOGY) %>%
+  tally()
+
+badsamps <- clin %>%
+  filter(HISTOLOGY_ABBREVIATION %in% c("Kidney-RCC", "Kidney-ChRCC"))
+```
+
 ```{r calculate buffa score}
 checkGenes(as.character(rna$Hugo_Symbol), "Buffa")
 alt.gene.names <- c("PNP", "HILPDA", "MRGBP", "AK3", "ESRP1", "CTSV")
 
 buffain <- rna %>%
   mutate(Gene = as.character(Hugo_Symbol)) %>%
-  select(-Hugo_Symbol)
+  select(-Hugo_Symbol) %>%
+  select(-any_of(badsamps$SAMPLE_ID))
 
 rna.buffa <- calculateBuffa(buffain, c(inputGenes("Buffa"), alt.gene.names))
 ```
@@ -130,6 +149,9 @@ corr.in <- mirna %>%
   left_join(rna.buffa)
 
 table(is.na(corr.in$buffa.score))
+
+corr.in <- corr.in %>%
+  drop_na(buffa.score)
 ```
 
 ```{r statisitcal correlation test}
@@ -149,5 +171,17 @@ corr.in %>%
 ggsave("../figures/scatterplot_buffa-vs-mir210.png")
 ```
 
+```{r plot buffa v mir210 with cancer facet}
+corr.in %>%
+  mutate(SAMPLE_ID = sample) %>%
+  left_join(clin) %>%
+  ggplot(aes(x = buffa.score, y = MIR210)) +
+  facet_wrap(vars(HISTOLOGY_ABBREVIATION), scales = "free") + 
+  geom_point() +
+  stat_smooth(method = "lm", color = "red") +
+  labs(x = "Buffa Hypoxia Score", y = "log(hsa-miR-210-3p + 1)") +
+  theme_bw() 
+ggsave("../figures/scatterplot_buffa-vs-mir210_facet.png")
+```
 
 
