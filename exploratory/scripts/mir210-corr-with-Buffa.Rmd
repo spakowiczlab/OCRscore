@@ -134,6 +134,9 @@ table(is.na(corr.in$buffa.score))
 
 ```{r statisitcal correlation test}
 cor.test(corr.in$MIR210, corr.in$buffa.score)
+
+lm(MIR210 ~ buffa.score, data = corr.in) %>%
+  summary()
 ```
 
 ```{r plot buffa v mir210}
