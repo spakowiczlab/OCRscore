@@ -12,6 +12,7 @@ library(tidyverse)
 library(devtools)
 # install_github("spakowiczlab/tmesig")
 library(tmesig)
+library(forcats)
 
 source("00-paths.R")
 ```
@@ -173,9 +174,21 @@ ggsave("../figures/scatterplot_buffa-vs-mir210.png",
 ```
 
 ```{r plot buffa v mir210 with cancer facet}
-corr.in %>%
+corr.can <- 
+  corr.in %>%
   mutate(SAMPLE_ID = sample) %>%
-  left_join(clin) %>%
+  left_join(clin)
+
+can.ord <- 
+  corr.can %>%
+  group_by(HISTOLOGY_ABBREVIATION) %>%
+  summarize(mean.Buffa = mean(buffa.score)) %>%
+  arrange(mean.Buffa)
+
+corr.can %>% 
+  left_join(can.ord) %>%
+  mutate(HISTOLOGY_ABBREVIATION = fct_reorder(HISTOLOGY_ABBREVIATION, 
+                                              mean.Buffa)) %>%
   ggplot(aes(x = buffa.score, y = MIR210)) +
   facet_wrap(vars(HISTOLOGY_ABBREVIATION), scales = "free") + 
   geom_point(alpha = 0.2) +
