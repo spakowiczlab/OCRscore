@@ -90,7 +90,7 @@ pm <-
   spread(key = Hugo_Symbol, value = FPKM)
 
 pm %>%
-  select(contains("mir-210")) %>%
+  dplyr::select(contains("mir-210")) %>%
   gather(key = "miR", value = "FPKM") %>%
   ggplot(aes(x = log(FPKM+1))) +
   geom_histogram(aes(fill = miR)) +
@@ -132,9 +132,9 @@ alt.gene.names <- c("PNP", "HILPDA", "MRGBP", "AK3", "ESRP1", "CTSV")
 
 buffain <- rna %>%
   mutate(Gene = as.character(Hugo_Symbol)) %>%
-  select(-Hugo_Symbol) %>%
-  select(-any_of(badsamps$SAMPLE_ID)) %>%
-  select(-any_of(clin$SAMPLE_ID[is.na(clin$HISTOLOGY_ABBREVIATION)]))
+  dplyr::select(-Hugo_Symbol) %>%
+  dplyr::select(-any_of(badsamps$SAMPLE_ID)) %>%
+  dplyr::select(-any_of(clin$SAMPLE_ID[is.na(clin$HISTOLOGY_ABBREVIATION)]))
 
 rna.buffa <- calculateBuffa(buffain, c(inputGenes("Buffa"), alt.gene.names))
 ```
@@ -144,7 +144,7 @@ corr.in.gene <- rna %>%
   filter(Hugo_Symbol %in% c("PDK1", "PDK3", "NDUFA4L2")) %>%
   gather(!Hugo_Symbol, key = "sample", value = "counts") %>%
   mutate(log.counts = log(counts + 1)) %>%
-  select(sample, Hugo_Symbol, log.counts) %>%
+  dplyr::select(sample, Hugo_Symbol, log.counts) %>%
   left_join(rna.buffa)
 
 corr.in.mir <- mirna %>%
@@ -154,7 +154,7 @@ corr.in.mir <- mirna %>%
   rownames_to_column(var = "sample") %>%
   mutate(log.counts = log(`hsa-miR-210-3p` + 1),
          Hugo_Symbol = "MIR210") %>%
-  select(sample, Hugo_Symbol, log.counts) %>%
+  dplyr::select(sample, Hugo_Symbol, log.counts) %>%
   left_join(rna.buffa)
 
 table(is.na(corr.in.mir$buffa.score))
@@ -180,7 +180,7 @@ lm(MIR210 ~ buffa.score, data = stat.in) %>%
 corr.in %>%
   ggplot(aes(x = buffa.score, y = log.counts)) +
   facet_wrap(vars(Hugo_Symbol), nrow = 1) +
-  geom_point(alpha = 0.2) +
+  geom_point(color = "grey", alpha = 0.2) +
   stat_smooth(method = "lm", color = "red") +
   labs(x = "Buffa Hypoxia Score", y = "log(expression + 1)") +
   theme_bw() 
@@ -206,8 +206,8 @@ corr.can %>%
   mutate(HISTOLOGY_ABBREVIATION = fct_relevel(HISTOLOGY_ABBREVIATION,
                                               can.ord.vec)) %>%
   ggplot(aes(x = buffa.score, y = log.counts)) +
-  facet_wrap(vars(HISTOLOGY_ABBREVIATION,Hugo_Symbol), scales = "free", ncol = 4) +
-  geom_point(alpha = 0.2) +
+  facet_wrap(vars(HISTOLOGY_ABBREVIATION,Hugo_Symbol), ncol = 4) +
+  geom_point(color = "grey", alpha = 0.2) +
   stat_smooth(method = "lm", color = "red") +
   labs(x = "Buffa Hypoxia Score", y = "log(expression + 1)") +
   theme_bw() 

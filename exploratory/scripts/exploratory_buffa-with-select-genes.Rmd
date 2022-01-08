@@ -14,13 +14,16 @@ library(ggplot2)
 library(annotate)
 library(org.Hs.eg.db)
 library(RColorBrewer)
+
+source("00-paths.R")
 ```
 
 
 # Load all data
 
 ```{r}
-proj.dir <- "/fs/ess/PAS1695/projects/mitoscore"
+# proj.dir <- "/fs/ess/PAS1695/projects/mitoscore"
+proj.dir <- file.path(paths$box, "data", "tcga-expression")
 split.dirs <- list.files(proj.dir)
 cnames <- gsub("_.*", "", split.dirs)
 names(split.dirs) <- cnames
@@ -149,7 +152,7 @@ ggsave("../figures/correlate_buffa-against-mitochondrial_facet.png",
        height = 30, width = 10)
 ```
 
-# Integrate with pancwg data
+# Integrate with pcawg data
 
 ```{r}
 integ.data <- plot.in %>%
@@ -164,10 +167,11 @@ integ.data %>%
              # color = is.na(BUFFA_HYPOXIA_SCORE)
              )) +
   facet_wrap(vars(Hugo_Symbol), nrow = 1) +
-  geom_point(alpha = .2) +
+  geom_point(color = "grey", alpha = 0.2) +
   stat_smooth(method = "lm", color = "red") +
   labs(x = "Buffa hypoxia score", y = "log(expression + 1)") +
   theme_bw()
-ggsave("../figures/scatterplot_buffa-MIR210-genes_TCGA-pancwg.png")
+ggsave("../figures/scatterplot_buffa-MIR210-genes_TCGA-pcawg.png",
+       height = 3, width = 6)
 ```
 
