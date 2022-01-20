@@ -1,0 +1,108 @@
+---
+title: "change point analysis"
+author: "Caroline Wheeler"
+date: "1/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggExtra)
+library(gt)
+library(viridis)
+library(ggtext)
+library(segmented)
+library(broom)
+
+source("00-paths.R")
+```
+
+```{r}
+x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+  
+
+mitoscore.files <- x %>%
+  filter(grepl("OXPHOS", files))
+```
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+           # cancer = toupper(cancer)) 
+}
+
+mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows()
+```
+
+see data
+```{r}
+p <- ggplot(mitoscore, aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) + geom_line()
+p
+```
+
+```{r}
+my.lm <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = mitoscore)
+summary(my.lm)
+```
+
+```{r}
+# have to provide estimates for breakpoints.
+# after looking a the data, 
+my.seg <- segmented(my.lm, 
+                    seg.Z = ~ BUFFA_HYPOXIA_SCORE, 
+                    psi = list(BUFFA_HYPOXIA_SCORE = 0))
+
+# When not providing estimates for the breakpoints "psi = NA" can be used.
+# The number of breakpoints that will show up is not defined
+#my.seg <- segmented(my.lm, 
+#                    seg.Z = ~ DistanceMeters, 
+#                    psi = NA)
+
+# display the summary
+summary(my.seg)
+```
+
+```{r}
+my.seg$psi
+```
+
+separate by cancer
+```{r}
+corder <- readRDS("../data/order-cancers-lollipop.RDS")
+mitoscore$cancer <- toupper(mitoscore$cancer)
+lm.res <- list()
+for(x in corder){
+  tmp <- mitoscore %>%
+    filter(cancer == x)
+  
+  lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
+  lm.res[[x]] <- lm.mod
+
+}
+
+```
+
+individual cancers 
+```{r}
+test <- segmented(lm.res[[1]], 
+                    seg.Z = ~ BUFFA_HYPOXIA_SCORE, 
+                    psi = list(BUFFA_HYPOXIA_SCORE = 0))
+
+summary(test)
+test$psi
+```
+
+
+
