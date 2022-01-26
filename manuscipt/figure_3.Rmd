@@ -9,9 +9,31 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 tar_load(integ.data)
+tar_load(plotdat_scores_for_lm)
 ```
 
+# A
+
 # B
+
+```{r}
+plotdat_scores_for_lm %>%
+  filter(cancer %in% c("THCA", "PRAD", "LGG", "CESC", "LUSC", "HNSC")) %>%
+  mutate(`Buffa Category` = fct_relevel(`Buffa Category`, "LB")) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature), method = "lm") +
+  facet_wrap(~ `Buffa Category` + cancer) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet.png",
+       height = 10,
+       width = 7.5)
+```
+
+# C
 
 ```{r}
 integ.data %>%

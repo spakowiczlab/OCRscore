@@ -3,5 +3,13 @@ F3B_mir_file|stem|5c3c223fa22d63b4|4288430a8de523f1|ef46db3751d8e999|705058605|.
 F3B_data_RDS|stem|e9871e9a72a2ab9c|a873609437c5fc1e|ef46db3751d8e999|874682516|../exploratory/data/oxic-induced-genes.RDS|t18997.5762401891s|00543688c6fb4533|181812|file|vector|||0||
 F3B_mir_data|stem|5c3c223fa22d63b4|96cd061805d277e4|d80a10e295835cac|-1365163605||t19018.7458753235s|ecb6eb7c242fcdce|29287|rds|vector|||0.03||
 F3B_plot_data|stem|297595de4df39ad0|e63d16690293806b|a203a77afa3b96dc|-927865167||t19018.745878721s|ef82928bf325f8e7|181815|rds|vector|||0.08||
-format_integ_data|function|3a693cdb29802955||||||||||||||
 integ.data|stem|e05a39c4975d76c5|2816e1590a9f5ae2|3e24e6cbac65b98c|-1158608149||t19018.7461858066s|4b6d371d9a546227|318896|rds|vector|||4.39||
+many_cancers_dir|stem|12cf1d3a45a2a60f|82b6d0c2d80bf51f|b7e4bb012de887e4|-811497719|C:/Users/hoyd02/Box Sync/mitoscore/data/many-cancers|t18997.5787913129s|908ec9ea9f0a90f4|0|file|vector|||1.41||
+scores_across_cancers|stem|629ebc71347a2351|149709c2741f3c45|7bf3b52f16f2b7c3|-968452398||t19018.8969346612s|23a67848207a5d65|196675|rds|vector|||3.78||
+paths|object|168ad706c6c3dcca||||||||||||||
+user.funs|object|11ae749f3fc6166e||||||||||||||
+formatForSmooth|function|0f7d629fe0118981||||||||||||||
+readAndFilter|function|03928f6a3d41fc71||||||||||||||
+format_integ_data|function|3a693cdb29802955||||||||||||||
+loadManyScores|function|fa40294b5db05829||||||||||||||
+plotdat_scores_for_lm|stem|67885f66a843b433|146daf5540e004c1|2306d948fa76f47e|1409836149||t19018.8972112619s|bd7967edea041890|263509|rds|vector|||1.39||
