@@ -128,6 +128,32 @@ cmb <-
 ```
 
 ```{r}
+cmb %>%
+  filter(cancer != "KIRC") %>%
+  select(-mean) %>%
+  gather(key = "signature", value = "score", 
+         -BUFFA_HYPOXIA_SCORE,
+         -cancer,
+         -pos,
+         -`Buffa Category`,
+         -sampleID) %>%
+  mutate(`Buffa Category` = fct_relevel(`Buffa Category`, "LB"),
+         signature = gsub("Electron Transport Chain", "Mitoscore", signature)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature), method = "lm") +
+  facet_wrap(~ cancer) +
+  labs(x = "Buffa Hypoxia Score",
+       y = expression(paste("Average ", Log[2], " Expression", sep = ""))) +
+  theme_bw() +
+  scale_color_viridis_d()
+ggsave("../figures/SuppFig_hb-lb_lm_facet.png",
+       height = 8,
+       width = 6.5)
+```
+
+
+```{r}
 cmbl <- 
   cmb %>%
   filter(cmb$`Buffa Category` != "Avg.") %>%
@@ -169,12 +195,13 @@ cmbl %>%
   geom_smooth(aes(color = signature), method = "lm") +
   facet_wrap(~ `Buffa Category` + cancer) +
   labs(x = "Buffa Hypoxia Score",
-       y = "Mitochondrial Oxygen Demand") +
+       y = expression(paste("Average ", Log[2], " Expression", sep = ""))) +
   theme_bw() +
-  scale_color_viridis_d()
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
 ggsave("../figures/SuppFig2_hb-lb_3sigs_loess_facet_version2.png",
-       height = 6,
-       width = 7.5)
+       height = 5,
+       width = 5)
 ```
 
 
