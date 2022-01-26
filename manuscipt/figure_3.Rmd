@@ -1,0 +1,29 @@
+---
+title: "Figure 1"
+author: "Rebecca Hoyd"
+date: "1/26/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+tar_load(integ.data)
+```
+
+# B
+
+```{r}
+integ.data %>%
+  ggplot(aes(x = buffa.score, y = log.counts
+             # color = is.na(BUFFA_HYPOXIA_SCORE)
+             )) +
+  facet_wrap(vars(Hugo_Symbol), nrow = 1) +
+  geom_point(color = "grey", alpha = 0.2) +
+  stat_smooth(method = "lm", color = "red") +
+  labs(x = "Buffa hypoxia score", 
+       y = expression(paste(Log[2], "(Expression + 1)", sep = ""))) +
+  theme_bw()
+ggsave("figures/scatterplot_buffa-MIR210-genes_TCGA-pcawg.png",
+       height = 3, width = 5)
+```
