@@ -5,7 +5,7 @@ lapply(user.funs, function(x) source(x))
 source("../exploratory/scripts/00-paths.R")
 # source("../exploratory/scripts/00-paths.R")
 options(tidyverse.quiet = TRUE)
-tar_option_set(packages = c("tidyverse", "tmesig"))
+tar_option_set(packages = c("tidyverse", "tmesig", "readxl", "flextable"))
 list(
   tar_target(
     many_cancers_dir,
@@ -44,6 +44,15 @@ list(
   tar_target(
     integrated_TCGA_PCAWG,
     bind_rows(pcawg_mir_buffa, tcga_genes_buffa)
+  ),
+  tar_target(
+    F4_OS_file,
+    "../exploratory/data/Subunit OS 11242021.xlsx",
+    format = "file"
+  ),
+  tar_target(
+    F4_OS_data,
+    read_xlsx(F4_OS_file)
   )
   # tar_target(
   #   F3B_data_RDS,
