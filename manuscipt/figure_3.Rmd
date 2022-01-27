@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+library(ggtext)
 tar_load(integrated_TCGA_PCAWG)
 tar_load(plotdat_scores_for_lm)
 tar_load(mitoscores)
@@ -32,16 +33,20 @@ ggsave("figures/scatterplot_buffa-mito_all_split-lm.png",
 ```{r}
 plotdat_scores_for_lm %>%
   filter(cancer %in% c("THCA", "PRAD", "LGG", "CESC", "LUSC", "HNSC")) %>%
-  mutate(`Buffa Category` = fct_relevel(`Buffa Category`, "LB")) %>%
+  mutate(`Buffa Category` = fct_relevel(`Buffa Category`, "LB"),
+         signature = ifelse(grepl("Electron", signature), "Mitoscore", signature)) %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
   geom_point(color = "grey", alpha = 0.2) +
   geom_smooth(aes(color = signature), method = "lm") +
   facet_wrap(~ `Buffa Category` + cancer) +
   labs(x = "Buffa Hypoxia Score",
-       y = "Mitochondrial Oxygen Demand") +
+       y = "Average Log<sub>2</sub> Expression") +
+  scale_color_viridis_d(direction = -1, name = "Signature") +
   theme_bw() +
-  scale_color_viridis_d()
-ggsave("../figures/Fig3_hb-lb_3sigs_lm_facet.png",
+  theme(axis.title.y = element_markdown(),
+        legend.position = "top")
+  
+ggsave("figures/Fig3_hb-lb_3sigs_lm_facet.png",
        height = 10,
        width = 7.5)
 ```

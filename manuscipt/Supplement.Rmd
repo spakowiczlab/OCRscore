@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(ggtext)
 ```
 
 ```{r}
@@ -18,14 +20,17 @@ tar_load(plotdat_scores_for_lm)
 ```{r}
 plotdat_scores_for_lm %>%
   filter(cancer != "KIRC") %>%
+  mutate(signature = ifelse(grepl("Electron", signature), "Mitoscore", signature)) %>%
   ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
   geom_point(color = "grey", alpha = 0.2) +
   geom_smooth(aes(color = signature), method = "lm") +
   facet_wrap(~cancer, nrow = 3) +
   labs(x = "Buffa Hypoxia Score",
-       y = "Mitochondrial Oxygen Demand") +
+       y = "Average Log<sub>2</sub> Expression") +
+  scale_color_viridis_d(name = "Signature") +
   theme_bw() +
-  scale_color_viridis_d(name = "Signature")
+  theme(axis.title.y = element_markdown(),
+        legend.position = "top")
 ggsave("figures/Supp_3sigs_loess_facet.png",
        height = 10,
        width = 7.5)
