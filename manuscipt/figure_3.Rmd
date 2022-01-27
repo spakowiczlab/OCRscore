@@ -8,11 +8,24 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-tar_load(integ.data)
+tar_load(integrated_TCGA_PCAWG)
 tar_load(plotdat_scores_for_lm)
+tar_load(mitoscores)
 ```
 
 # A
+
+```{r}
+mitoscores %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
+  theme_bw() +
+  stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 1.5) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "mitoscore")
+ggsave("figures/scatterplot_buffa-mito_all_split-lm.png",
+       height = 3, width = 5)
+```
 
 # B
 
@@ -28,7 +41,7 @@ plotdat_scores_for_lm %>%
        y = "Mitochondrial Oxygen Demand") +
   theme_bw() +
   scale_color_viridis_d()
-ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet.png",
+ggsave("../figures/Fig3_hb-lb_3sigs_lm_facet.png",
        height = 10,
        width = 7.5)
 ```
@@ -36,7 +49,7 @@ ggsave("../figures/Fig3_hb-lb_3sigs_loess_facet.png",
 # C
 
 ```{r}
-integ.data %>%
+integrated_TCGA_PCAWG %>%
   ggplot(aes(x = buffa.score, y = log.counts
              # color = is.na(BUFFA_HYPOXIA_SCORE)
              )) +

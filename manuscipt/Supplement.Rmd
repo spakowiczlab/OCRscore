@@ -1,0 +1,32 @@
+---
+title: "Supplement"
+author: "Rebecca Hoyd"
+date: "1/27/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+tar_load(plotdat_scores_for_lm)
+```
+
+# Many Scores, Many Cancers correlations
+
+```{r}
+plotdat_scores_for_lm %>%
+  filter(cancer != "KIRC") %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature), method = "lm") +
+  facet_wrap(~cancer, nrow = 3) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitochondrial Oxygen Demand") +
+  theme_bw() +
+  scale_color_viridis_d(name = "Signature")
+ggsave("figures/Supp_3sigs_loess_facet.png",
+       height = 10,
+       width = 7.5)
+```

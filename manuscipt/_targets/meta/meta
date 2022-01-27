@@ -6,10 +6,19 @@ F3B_plot_data|stem|297595de4df39ad0|e63d16690293806b|a203a77afa3b96dc|-927865167
 integ.data|stem|e05a39c4975d76c5|2816e1590a9f5ae2|3e24e6cbac65b98c|-1158608149||t19018.7461858066s|4b6d371d9a546227|318896|rds|vector|||4.39||
 many_cancers_dir|stem|12cf1d3a45a2a60f|82b6d0c2d80bf51f|b7e4bb012de887e4|-811497719|C:/Users/hoyd02/Box Sync/mitoscore/data/many-cancers|t18997.5787913129s|908ec9ea9f0a90f4|0|file|vector|||1.41||
 scores_across_cancers|stem|629ebc71347a2351|149709c2741f3c45|7bf3b52f16f2b7c3|-968452398||t19018.8969346612s|23a67848207a5d65|196675|rds|vector|||3.78||
-paths|object|168ad706c6c3dcca||||||||||||||
-user.funs|object|11ae749f3fc6166e||||||||||||||
-formatForSmooth|function|0f7d629fe0118981||||||||||||||
-readAndFilter|function|03928f6a3d41fc71||||||||||||||
-format_integ_data|function|3a693cdb29802955||||||||||||||
-loadManyScores|function|fa40294b5db05829||||||||||||||
 plotdat_scores_for_lm|stem|67885f66a843b433|146daf5540e004c1|2306d948fa76f47e|1409836149||t19018.8972112619s|bd7967edea041890|263509|rds|vector|||1.39||
+mitoscores|stem|9bec296bee74577d|52ce3f4b37e9c230|e776d65423c1a4cb|1472701082||t19019.6031849265s|f7650fee01421641|93032|rds|vector|||2.42||
+pcawg_dir|stem|d75e81ef269ef126|1598165a1b65f1ce|b7e4bb012de887e4|-1319964680|C:/Users/hoyd02/Box Sync/mitoscore/data/pancan_pcawg_2020|t18997.5817632958s|908ec9ea9f0a90f4|0|file|vector|||1.46||
+tcga_dir|stem|45d61f5d2734320c|a15a1ea82e58a60c|b7e4bb012de887e4|1189199845|C:/Users/hoyd02/Box Sync/mitoscore/data/tcga-expression|t19002.5425756345s|908ec9ea9f0a90f4|0|file|vector|||0||
+pcawg_mir_buffa|stem|e7848f67d32700e4|f0717a37e00b9b98|3ebb890cc0a2f4d8|-559078288||t19019.7424096494s|313730001a1a41bd|8271|rds|vector|||209.25||
+loadAndFormatTCGA|function|f7d0a0189ae2b92e||||||||||||||
+paths|object|168ad706c6c3dcca||||||||||||||
+readAndFilter|function|03928f6a3d41fc71||||||||||||||
+user.funs|object|a023a1113e4b7614||||||||||||||
+formatForSmooth|function|0f7d629fe0118981||||||||||||||
+loadAndFormatPCAWG|function|7dd7a002062b572b||||||||||||||
+format_integ_data|function|3a693cdb29802955||||||||||||||
+loadMitoscores|function|bf0a198fcdf43e04||||||||||||||
+loadManyScores|function|fa40294b5db05829||||||||||||||
+tcga_genes_buffa|stem|764d1823075c51fd|e6b3a91f8cb8bb44|58b7721bb384204e|1020609548||t19019.745717493s|2cd07e2386e60731|307006|rds|vector|||186.8||
+integrated_TCGA_PCAWG|stem|9431a16cfa760edc|67395ee73731c409|8fb9c2f047a142a1|-1834143350||t19019.7457185692s|a78a055cad541051|318055|rds|vector|||0||
