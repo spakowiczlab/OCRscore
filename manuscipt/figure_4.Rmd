@@ -7,12 +7,30 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(flextable)
 
-tar_load()
+tar_load(comparison_data)
+tar_load(original_data)
 ```
 
-table
+p-values
 ```{r}
+print("Core - Positive")
+sum(comparison_data$Core.Positive >= original_data$Core.Positive, na.rm = TRUE) / B
 
+print("Core - Negative")
+sum(comparison_data$Core.Negative >= original_data$Core.Negative, na.rm = TRUE) / B
+
+print("Core - NA")
+sum(comparison_data$Core.NA>= original_data$Core.NA, na.rm = TRUE) / B
+
+print("Supernumerary - Postive")
+sum(comparison_data$Supernumerary.Positive>= original_data$Supernumerary.Positive, na.rm = TRUE) / B
+
+print("Supernumerary - Negative")
+sum(comparison_data$Supernumerary.Negative >= original_data$Supernumerary.Negative, na.rm = TRUE) / B
+
+print("Supernumerary - NA")
+sum(comparison_data$Supernumerary.NA >= original_data$Supernumerary.NA, na.rm = TRUE) / B
 ```
 
