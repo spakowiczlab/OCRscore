@@ -16,21 +16,21 @@ tar_load(original_data)
 p-values
 ```{r}
 print("Core - Positive")
-sum(comparison_data$Core.Positive >= original_data$Core.Positive, na.rm = TRUE) / B
+sum(comparison_data$Core.Positive >= original_data$Core.Positive, na.rm = TRUE) / 1000
 
 print("Core - Negative")
-sum(comparison_data$Core.Negative >= original_data$Core.Negative, na.rm = TRUE) / B
+sum(comparison_data$Core.Negative >= original_data$Core.Negative, na.rm = TRUE) / 1000
 
 print("Core - NA")
-sum(comparison_data$Core.NA>= original_data$Core.NA, na.rm = TRUE) / B
+sum(comparison_data$Core.NA>= original_data$Core.NA, na.rm = TRUE) / 1000
 
 print("Supernumerary - Postive")
-sum(comparison_data$Supernumerary.Positive>= original_data$Supernumerary.Positive, na.rm = TRUE) / B
+sum(comparison_data$Supernumerary.Positive>= original_data$Supernumerary.Positive, na.rm = TRUE) / 1000
 
 print("Supernumerary - Negative")
-sum(comparison_data$Supernumerary.Negative >= original_data$Supernumerary.Negative, na.rm = TRUE) / B
+sum(comparison_data$Supernumerary.Negative >= original_data$Supernumerary.Negative, na.rm = TRUE) / 1000
 
 print("Supernumerary - NA")
-sum(comparison_data$Supernumerary.NA >= original_data$Supernumerary.NA, na.rm = TRUE) / B
+sum(comparison_data$Supernumerary.NA >= original_data$Supernumerary.NA, na.rm = TRUE) / 1000
 ```
 
