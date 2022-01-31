@@ -105,4 +105,68 @@ test$psi
 ```
 
 
+## Check segmented results
+
+Create split data
+```{r}
+split0_less <- mitoscore %>% filter(BUFFA_HYPOXIA_SCORE < 0)
+split0_more <- mitoscore %>% filter(BUFFA_HYPOXIA_SCORE > 0)
+split_neg16_less <- mitoscore %>% filter(BUFFA_HYPOXIA_SCORE < -16)
+split_neg16_more <- mitoscore %>% filter(BUFFA_HYPOXIA_SCORE > -16)
+
+lm_0_less <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = split0_less) 
+lm_0_more <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = split0_more)
+
+lm_neg16_less <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = split_neg16_less)
+lm_neg16_more <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = split_neg16_more)
+```
+
+
+Log likelihoods w/ no breaks, break at -16, and break at 0
+The actual log-likelihood value for a given model is mostly meaningless, but it’s useful for comparing two or more models.
+```{r}
+print("No breaks")
+logLik(my.lm)
+
+print("Breakpoint = 0")
+logLik(lm_0_less) + logLik(lm_0_more)
+
+print("Breakpoint = -16")
+logLik(lm_neg16_less) + logLik(lm_neg16_more)
+```
+
+# check all buffa values as breakpoint
+```{r}
+bp_min <- min(mitoscore$BUFFA_HYPOXIA_SCORE) + 3
+bp_max <- max(mitoscore$BUFFA_HYPOXIA_SCORE) - 1
+
+bp_data <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("breakpoint", "sum(loglik)"))
+
+for (bp in bp_min:bp_max) {
+  split_less <- mitoscore %>% filter(BUFFA_HYPOXIA_SCORE < bp)
+  split_more <- mitoscore %>% filter(BUFFA_HYPOXIA_SCORE > bp)
+  
+  lm_less <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = split_less) 
+  lm_more <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = split_more)
+  
+  temp <- logLik(lm_less) + logLik(lm_more)
+  
+  new_row <- c(bp, temp)
+  bp_data <- rbind(bp_data, new_row)
+}
+```
+
+plot all breakpoints
+```{r}
+colnames(bp_data) <- c("Breakpoint", "sum(logLik)")
+p <- ggplot(bp_data, aes(x = Breakpoint, y = bp_data$`sum(logLik)`)) + geom_line() + geom_vline(xintercept = -19, linetype="dashed", color = "red") + geom_text(aes(x=-8, label="Breakpoint = -19", y=-4050), colour="red",  vjust = -1, text=element_text(size=11)) + geom_smooth()
+p
+```
+
+
+```{r}
+for (bp in bp_min:bp_max) {
+  print(bp)
+}
+```
 
