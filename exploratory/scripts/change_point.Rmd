@@ -43,12 +43,23 @@ readAndFilter <- function(table) {
 }
 
 mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
-  bind_rows()
+  bind_rows() %>%
+  filter(cancer != 'kirc')
+```
+
+run if you want to average AvgExpr
+```{r}
+mitoscore <- mitoscore %>%
+  select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+  group_by(BUFFA_HYPOXIA_SCORE) %>%
+  summarise(mean(AvgExpr)) 
+
+colnames(mitoscore) <- c("BUFFA_HYPOXIA_SCORE", "AvgExpr")
 ```
 
 see data
 ```{r}
-p <- ggplot(mitoscore, aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) + geom_line()
+p <- ggplot(mitoscore, aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) + geom_line() + geom_vline(xintercept = -18, linetype="dashed", color = "red")
 p
 ```
 
@@ -62,7 +73,7 @@ summary(my.lm)
 # after looking a the data, 
 my.seg <- segmented(my.lm, 
                     seg.Z = ~ BUFFA_HYPOXIA_SCORE, 
-                    psi = list(BUFFA_HYPOXIA_SCORE = 0))
+                    psi = list(BUFFA_HYPOXIA_SCORE = -10))
 
 # When not providing estimates for the breakpoints "psi = NA" can be used.
 # The number of breakpoints that will show up is not defined
@@ -77,33 +88,6 @@ summary(my.seg)
 ```{r}
 my.seg$psi
 ```
-
-separate by cancer
-```{r}
-corder <- readRDS("../data/order-cancers-lollipop.RDS")
-mitoscore$cancer <- toupper(mitoscore$cancer)
-lm.res <- list()
-for(x in corder){
-  tmp <- mitoscore %>%
-    filter(cancer == x)
-  
-  lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
-  lm.res[[x]] <- lm.mod
-
-}
-
-```
-
-individual cancers 
-```{r}
-test <- segmented(lm.res[[1]], 
-                    seg.Z = ~ BUFFA_HYPOXIA_SCORE, 
-                    psi = list(BUFFA_HYPOXIA_SCORE = 0))
-
-summary(test)
-test$psi
-```
-
 
 ## Check segmented results
 
@@ -137,8 +121,8 @@ logLik(lm_neg16_less) + logLik(lm_neg16_more)
 
 # check all buffa values as breakpoint
 ```{r}
-bp_min <- min(mitoscore$BUFFA_HYPOXIA_SCORE) + 3
-bp_max <- max(mitoscore$BUFFA_HYPOXIA_SCORE) - 1
+bp_min <- min(mitoscore$BUFFA_HYPOXIA_SCORE) + 5
+bp_max <- max(mitoscore$BUFFA_HYPOXIA_SCORE) - 5
 
 bp_data <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("breakpoint", "sum(loglik)"))
 
@@ -159,14 +143,34 @@ for (bp in bp_min:bp_max) {
 plot all breakpoints
 ```{r}
 colnames(bp_data) <- c("Breakpoint", "sum(logLik)")
-p <- ggplot(bp_data, aes(x = Breakpoint, y = bp_data$`sum(logLik)`)) + geom_line() + geom_vline(xintercept = -19, linetype="dashed", color = "red") + geom_text(aes(x=-8, label="Breakpoint = -19", y=-4050), colour="red",  vjust = -1, text=element_text(size=11)) + geom_smooth()
+p <- ggplot(bp_data, aes(x = Breakpoint, y = bp_data$`sum(logLik)`)) + geom_line() + geom_vline(xintercept = -19, linetype="dashed", color = "red") + geom_text(aes(x=-7, label="MaxLogLik = -19", y=-3800), colour="red",  vjust = -1, text=element_text(size=11)) + geom_smooth()
 p
 ```
 
 
+
+##Indiviudal cancers
+separate by cancer
 ```{r}
-for (bp in bp_min:bp_max) {
-  print(bp)
+corder <- readRDS("../data/order-cancers-lollipop.RDS")
+mitoscore$cancer <- toupper(mitoscore$cancer)
+lm.res <- list()
+for(x in corder){
+  tmp <- mitoscore %>%
+    filter(cancer == x)
+  
+  lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
+  lm.res[[x]] <- lm.mod
+
 }
 ```
 
+individual cancers 
+```{r}
+test <- segmented(lm.res[[1]], 
+                    seg.Z = ~ BUFFA_HYPOXIA_SCORE, 
+                    psi = list(BUFFA_HYPOXIA_SCORE = 0))
+
+summary(test)
+test$psi
+```
