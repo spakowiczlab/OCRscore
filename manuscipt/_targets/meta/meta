@@ -4,34 +4,27 @@ F3B_data_RDS|stem|e9871e9a72a2ab9c|a873609437c5fc1e|ef46db3751d8e999|874682516|.
 F3B_mir_data|stem|5c3c223fa22d63b4|96cd061805d277e4|d80a10e295835cac|-1365163605||t19018.7458753235s|ecb6eb7c242fcdce|29287|rds|vector|||0.03||
 F3B_plot_data|stem|297595de4df39ad0|e63d16690293806b|a203a77afa3b96dc|-927865167||t19018.745878721s|ef82928bf325f8e7|181815|rds|vector|||0.08||
 integ.data|stem|e05a39c4975d76c5|2816e1590a9f5ae2|3e24e6cbac65b98c|-1158608149||t19018.7461858066s|4b6d371d9a546227|318896|rds|vector|||4.39||
-scores_across_cancers|stem|629ebc71347a2351|149709c2741f3c45|7bf3b52f16f2b7c3|-968452398||t19018.8969346612s|23a67848207a5d65|196675|rds|vector|||3.78||
-plotdat_scores_for_lm|stem|67885f66a843b433|146daf5540e004c1|2306d948fa76f47e|1409836149||t19018.8972112619s|bd7967edea041890|263509|rds|vector|||1.39||
-mitoscores|stem|9bec296bee74577d|52ce3f4b37e9c230|e776d65423c1a4cb|1472701082||t19019.6031849265s|f7650fee01421641|93032|rds|vector|||2.42||
-pcawg_dir|stem|d75e81ef269ef126|1598165a1b65f1ce|b7e4bb012de887e4|-1319964680|C:/Users/hoyd02/Box Sync/mitoscore/data/pancan_pcawg_2020|t18997.5817632958s|908ec9ea9f0a90f4|0|file|vector|||1.46||
-tcga_dir|stem|45d61f5d2734320c|a15a1ea82e58a60c|b7e4bb012de887e4|1189199845|C:/Users/hoyd02/Box Sync/mitoscore/data/tcga-expression|t19002.5425756345s|908ec9ea9f0a90f4|0|file|vector|||0||
-pcawg_mir_buffa|stem|e7848f67d32700e4|f0717a37e00b9b98|3ebb890cc0a2f4d8|-559078288||t19019.7424096494s|313730001a1a41bd|8271|rds|vector|||209.25||
-tcga_genes_buffa|stem|764d1823075c51fd|e6b3a91f8cb8bb44|58b7721bb384204e|1020609548||t19019.745717493s|2cd07e2386e60731|307006|rds|vector|||186.8||
-integrated_TCGA_PCAWG|stem|9431a16cfa760edc|67395ee73731c409|8fb9c2f047a142a1|-1834143350||t19019.7457185692s|a78a055cad541051|318055|rds|vector|||0||
+F4_OS_file|stem|7ade088f1a1d2fef|66a9e8e5c53e75dc|ef46db3751d8e999|2084828847|../exploratory/data/Subunit OS 11242021.xlsx|t18963.7906996641s|495d5ec02f9681fc|10316|file|vector|||0||
+mitoscores|stem|e449445970c83fcc|52ce3f4b37e9c230|14dc0d2324eb3b21|1472701082||t19024.8499792255s|f7650fee01421641|93032|rds|vector|||1.83||
+scores_across_cancers|stem|a21c7ab9082ce885|149709c2741f3c45|7bf3b52f16f2b7c3|-968452398||t19024.8500252771s|23a67848207a5d65|196675|rds|vector|||3.94||
+pcawg_mir_buffa|stem|8455060b096c240f|f0717a37e00b9b98|3ebb890cc0a2f4d8|-559078288||t19024.8520959158s|313730001a1a41bd|8271|rds|vector|||178.89||
+tcga_genes_buffa|stem|2969b01d50bd54d0|e6b3a91f8cb8bb44|58b7721bb384204e|1020609548||t19024.8541020819s|2cd07e2386e60731|307006|rds|vector|||173.28||
+F4_OS_data|stem|058ff0fd773fb5e5|c93423456af31b93|cb83bf7b0e15bcb4|-1748176545||t19024.8541025723s|c0f238815df9e013|449|rds|vector|||0.03||
+plotdat_scores_for_lm|stem|469f438d44c20efa|146daf5540e004c1|f2918ca23e772629|1409836149||t19024.8541037956s|bd7967edea041890|263509|rds|vector|||0.05||
+integrated_TCGA_PCAWG|stem|450f29c87f61216b|67395ee73731c409|35473f425ba1ebd6|-1834143350||t19024.8541047999s|a78a055cad541051|318055|rds|vector|||0||
+original_data|stem|9683ae38a5958533|c1126fa3a065c133|c53b30182eab7db4|-127803532||t19024.8541051347s|f960cceada7fe483|198|rds|vector|||0.01||
+comparison_data|stem|72f7f38f87ea0308|0b80fccd9cb39ca9|3f8b93e4a97fa1fd|-1907147920||t19024.8542848998s|6ccf69b1da08ede9|3781|rds|vector|||15.51||
 loadAndFormatTCGA|function|f7d0a0189ae2b92e||||||||||||||
-paths|object|daf9b25432bb1424||||||||||||||
+paths|object|66b605ea1dc6592d||||||||||||||
 readAndFilter|function|03928f6a3d41fc71||||||||||||||
-user.funs|object|93e3bbc665e73283||||||||||||||
+user.funs|object|c1301253f81db4d9||||||||||||||
 tallyArms|function|bef0c11700683359||||||||||||||
 formatForSmooth|function|0f7d629fe0118981||||||||||||||
 loadAndFormatPCAWG|function|7dd7a002062b572b||||||||||||||
 format_integ_data|function|3a693cdb29802955||||||||||||||
-loadMitoscores|function|57b7dac3ff149efc||||||||||||||
+loadMitoscores|function|f09ff366248061a7||||||||||||||
 loadManyScores|function|fa40294b5db05829||||||||||||||
 make_comparison_data|function|6061b505fc733ed8||||||||||||||
-many_cancers_dir|stem|12cf1d3a45a2a60f|82b6d0c2d80bf51f|6cb84110d1179d17|-811497719|C:/Users/hoyd02/Box Sync/mitoscore/data/many-cancers|t18997.5787913129s||0|file|vector|||0.963|there is no package called tmesig|could not find packages tmesig in library paths
-loadAndFormatTCGA|function|f7d0a0189ae2b92e
-paths|object|daf9b25432bb1424
-readAndFilter|function|03928f6a3d41fc71
-user.funs|object|93e3bbc665e73283
-tallyArms|function|bef0c11700683359
-formatForSmooth|function|0f7d629fe0118981
-loadAndFormatPCAWG|function|7dd7a002062b572b
-format_integ_data|function|3a693cdb29802955
-loadMitoscores|function|57b7dac3ff149efc
-loadManyScores|function|fa40294b5db05829
-make_comparison_data|function|6061b505fc733ed8
+many_cancers_dir|stem|12cf1d3a45a2a60f|82b6d0c2d80bf51f|9a0bafcbfb5cbff1|-811497719|C:/Users/spak01/Box/osu/projects/mitoscore/data/many-cancers|t18950.1832638889s|e4fc7dcc7dbc300f|4096|file|vector|||1.19|package readr was built under R version 4.1.2|
+pcawg_dir|stem|d75e81ef269ef126|1598165a1b65f1ce|9a0bafcbfb5cbff1|-1319964680|C:/Users/spak01/Box/osu/projects/mitoscore/data/pancan_pcawg_2020|t18997.007337963s|e4fc7dcc7dbc300f|4096|file|vector|||0||
+tcga_dir|stem|45d61f5d2734320c|a15a1ea82e58a60c|9a0bafcbfb5cbff1|1189199845|C:/Users/spak01/Box/osu/projects/mitoscore/data/tcga-expression|t18984.3297685185s|e4fc7dcc7dbc300f|4096|file|vector|||0||
