@@ -14,6 +14,9 @@ plotdat_scores_for_lm|stem|469f438d44c20efa|146daf5540e004c1|f2918ca23e772629|14
 integrated_TCGA_PCAWG|stem|450f29c87f61216b|67395ee73731c409|35473f425ba1ebd6|-1834143350||t19024.8541047999s|a78a055cad541051|318055|rds|vector|||0||
 original_data|stem|9683ae38a5958533|c1126fa3a065c133|c53b30182eab7db4|-127803532||t19024.8541051347s|f960cceada7fe483|198|rds|vector|||0.01||
 comparison_data|stem|72f7f38f87ea0308|0b80fccd9cb39ca9|3f8b93e4a97fa1fd|-1907147920||t19024.8542848998s|6ccf69b1da08ede9|3781|rds|vector|||15.51||
+many_cancers_dir|stem|12cf1d3a45a2a60f|82b6d0c2d80bf51f|9a0bafcbfb5cbff1|-811497719|C:/Users/spak01/Box/osu/projects/mitoscore/data/many-cancers|t18950.1832638889s|e4fc7dcc7dbc300f|4096|file|vector|||1.19|package readr was built under R version 4.1.2|
+pcawg_dir|stem|d75e81ef269ef126|1598165a1b65f1ce|9a0bafcbfb5cbff1|-1319964680|C:/Users/spak01/Box/osu/projects/mitoscore/data/pancan_pcawg_2020|t18997.007337963s|e4fc7dcc7dbc300f|4096|file|vector|||0||
+tcga_dir|stem|45d61f5d2734320c|a15a1ea82e58a60c|9a0bafcbfb5cbff1|1189199845|C:/Users/spak01/Box/osu/projects/mitoscore/data/tcga-expression|t18984.3297685185s|e4fc7dcc7dbc300f|4096|file|vector|||0||
 loadAndFormatTCGA|function|f7d0a0189ae2b92e||||||||||||||
 paths|object|66b605ea1dc6592d||||||||||||||
 readAndFilter|function|03928f6a3d41fc71||||||||||||||
@@ -25,6 +28,3 @@ format_integ_data|function|3a693cdb29802955||||||||||||||
 loadMitoscores|function|f09ff366248061a7||||||||||||||
 loadManyScores|function|fa40294b5db05829||||||||||||||
 make_comparison_data|function|6061b505fc733ed8||||||||||||||
-many_cancers_dir|stem|12cf1d3a45a2a60f|82b6d0c2d80bf51f|9a0bafcbfb5cbff1|-811497719|C:/Users/spak01/Box/osu/projects/mitoscore/data/many-cancers|t18950.1832638889s|e4fc7dcc7dbc300f|4096|file|vector|||1.19|package readr was built under R version 4.1.2|
-pcawg_dir|stem|d75e81ef269ef126|1598165a1b65f1ce|9a0bafcbfb5cbff1|-1319964680|C:/Users/spak01/Box/osu/projects/mitoscore/data/pancan_pcawg_2020|t18997.007337963s|e4fc7dcc7dbc300f|4096|file|vector|||0||
-tcga_dir|stem|45d61f5d2734320c|a15a1ea82e58a60c|9a0bafcbfb5cbff1|1189199845|C:/Users/spak01/Box/osu/projects/mitoscore/data/tcga-expression|t18984.3297685185s|e4fc7dcc7dbc300f|4096|file|vector|||0||

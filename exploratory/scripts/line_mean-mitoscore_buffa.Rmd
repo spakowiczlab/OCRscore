@@ -1,0 +1,74 @@
+---
+title: "change point analysis"
+author: "Caroline Wheeler"
+date: "1/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggExtra)
+library(gt)
+library(viridis)
+library(ggtext)
+library(segmented)
+library(broom)
+
+source("00-paths.R")
+```
+
+```{r}
+x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+
+mitoscore.files <- x %>%
+  filter(grepl("OXPHOS", files))
+```
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    dplyr::select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+           # cancer = toupper(cancer)) 
+}
+
+mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows() %>%
+  filter(cancer != 'kirc')
+```
+
+Calculate the average mitoscore at each Buffa integer.
+
+```{r}
+ave.mitoscore <- 
+  mitoscore %>%
+  dplyr::select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+  group_by(BUFFA_HYPOXIA_SCORE) %>%
+  summarise(Mitoscore = mean(AvgExpr),
+            sd.mito = sd(AvgExpr)) %>%
+  rename("Buffa Hypoxia Score" = BUFFA_HYPOXIA_SCORE) %>%
+  mutate(sd.low = Mitoscore - sd.mito,
+         sd.high = Mitoscore + sd.mito)
+
+```
+
+Plot result
+
+```{r}
+ave.mitoscore %>%
+  ggplot(aes(x = `Buffa Hypoxia Score`, y = Mitoscore)) + 
+  geom_line(lwd = 1) +
+  geom_ribbon(aes(ymin = sd.low, ymax = sd.high), alpha = 0.1) +
+  theme_bw()
+ggsave("../figures/line_mean-mitoscore_buffa.png",
+       height = 4, width = 6)
+```
