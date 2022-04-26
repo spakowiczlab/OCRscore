@@ -48,6 +48,8 @@ comb <- lapply(X = mitophagy.files$files, readAndFilter) %>%
   mutate(cancer = toupper(cancer)) %>%
   filter(cancer != "KIRC")
 
+saveRDS(comb, file = "../data/buffa-mitophagy_tcga-cancer.RData")
+comb <- readRDS("../data/buffa-mitophagy_tcga-cancer.RData")
 ```
 
 # Calculate the mean buffa for ordering purposes
@@ -112,5 +114,10 @@ ggsave("../figures/buffa-cancer-raincloud.png",
        height = 7, width = 5)
 ggsave("../figures/buffa-cancer-raincloud.svg",
        height = 7, width = 5)
+```
+
+```{r}
+Sys.getenv()
+Sys.info()
 ```
 
