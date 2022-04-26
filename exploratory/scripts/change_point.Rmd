@@ -41,7 +41,9 @@ readAndFilter <- function(table) {
                          x = cancer))
            # cancer = toupper(cancer)) 
 }
+```
 
+```{r}
 mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
   bind_rows() %>%
   filter(cancer != 'kirc')
@@ -145,32 +147,4 @@ plot all breakpoints
 colnames(bp_data) <- c("Breakpoint", "sum(logLik)")
 p <- ggplot(bp_data, aes(x = Breakpoint, y = bp_data$`sum(logLik)`)) + geom_line() + geom_vline(xintercept = -19, linetype="dashed", color = "red") + geom_text(aes(x=-7, label="MaxLogLik = -19", y=-3800), colour="red",  vjust = -1, text=element_text(size=11)) + geom_smooth()
 p
-```
-
-
-
-##Indiviudal cancers
-separate by cancer
-```{r}
-corder <- readRDS("../data/order-cancers-lollipop.RDS")
-mitoscore$cancer <- toupper(mitoscore$cancer)
-lm.res <- list()
-for(x in corder){
-  tmp <- mitoscore %>%
-    filter(cancer == x)
-  
-  lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
-  lm.res[[x]] <- lm.mod
-
-}
-```
-
-individual cancers 
-```{r}
-test <- segmented(lm.res[[1]], 
-                    seg.Z = ~ BUFFA_HYPOXIA_SCORE, 
-                    psi = list(BUFFA_HYPOXIA_SCORE = 0))
-
-summary(test)
-test$psi
 ```

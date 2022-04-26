@@ -1,0 +1,69 @@
+---
+title: "check_point_individual cancers"
+author: "Caroline Wheeler"
+date: "2/10/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggExtra)
+library(gt)
+library(viridis)
+library(ggtext)
+library(segmented)
+library(broom)
+
+source("00-paths.R")
+```
+
+```{r}
+x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+  
+
+mitoscore.files <- x %>%
+  filter(grepl("OXPHOS", files))
+```
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+           # cancer = toupper(cancer)) 
+}
+```
+
+separate by cancer
+```{r}
+mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows()
+
+x <- mitoscore %>% select(cancer) %>% distinct()
+
+for (canc in x) {
+}
+```
+
+loop through each cancer
+```{r}
+lm.res <- list()
+
+for(x in canc){
+  tmp <- mitoscore %>%
+    filter(cancer == x)
+  
+  lm.mod <- lm(AvgExpr ~  BUFFA_HYPOXIA_SCORE, data = tmp)
+  lm.res[[x]] <- lm.mod
+}
+```
+
