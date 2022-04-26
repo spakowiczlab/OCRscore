@@ -7,6 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(colorspace)
+source("00-paths.R")
 ```
 
 # Retrieve file names
@@ -58,8 +62,6 @@ mean.buffa <-
                              false = "LB")) %>%
   mutate(cancer = fct_reorder(cancer, mean))
 
-mean.buffa %>%
-  gt()
 ```
 
 

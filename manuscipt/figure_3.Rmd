@@ -1,5 +1,5 @@
 ---
-title: "Figure 1"
+title: "Figure 3"
 author: "Rebecca Hoyd"
 date: "1/26/2022"
 output: html_document
@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(ggtext)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(forcats)
 tar_load(integrated_TCGA_PCAWG)
 tar_load(plotdat_scores_for_lm)
 tar_load(mitoscores)
@@ -47,8 +51,8 @@ plotdat_scores_for_lm %>%
         legend.position = "top")
   
 ggsave("figures/Fig3_hb-lb_3sigs_lm_facet.png",
-       height = 10,
-       width = 7.5)
+       height = 5,
+       width = 5)
 ```
 
 # C
