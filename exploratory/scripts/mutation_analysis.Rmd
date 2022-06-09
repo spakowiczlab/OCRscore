@@ -1,0 +1,128 @@
+---
+title: "buffa mitoscore"
+author: "Caroline Wheeler"
+date: "5/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(ggrepel)
+
+source("00-paths.R")
+```
+
+
+```{r}
+# read file path
+all_paths <-
+  list.files(path = paste0(paths$box, "/data/DenkoMay2022_AvgPanelExpr_vs_Mutation/WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA"),
+             pattern = "*.txt",
+             full.names = TRUE)
+
+# read file content
+all_content <-
+  all_paths %>%
+  lapply(read.table,
+         header = TRUE,
+         sep = "\t",
+         encoding = "UTF-8")
+
+# read file name
+all_filenames <- all_paths %>%
+  basename() %>%
+  as.list()
+
+# combine file content list and file name list
+all_lists <- mapply(c, all_content, all_filenames, SIMPLIFY = FALSE)
+
+# unlist all lists and change column name
+all_mito <- rbindlist(all_lists, fill = T)
+
+# change column name
+names(all_mito)[7] <- "cancer"
+
+all_mito <- all_mito %>%
+  mutate(cancer = gsub("^[^_]*_\\s*|_[^_]*$", "", cancer),
+         gene = ifelse(ttest_p < 2.258832e-04, X, NA))
+```
+
+```{r}
+all_mito %>% ggplot(aes(x = X, y = -log10(ttest_p), color = cancer, label = gene)) +
+  geom_point() +
+  geom_text_repel(color = "black", size = 3) + 
+  theme( axis.text.x=element_blank(),
+         axis.title.x=element_blank()) +
+  scale_color_manual(values = alpha(c('black','forestgreen', 'red2', 'yellowgreen', 'orange',
+                'magenta', 'tan4', "tan2",'firebrick4', "gainsboro", 'lightsalmon', 'tan3',
+                'wheat4', "#7CE3D8", 'mediumvioletred','cadetblue1' ,'darkblue', "tomato3", 'cornflowerblue'), .3))
+
+ggsave(file = "../figures/mutation_analysis.png", dev = "png", width = 7, height = 6)
+```
+
+```{r}
+all_mito <- all_mito %>%
+  mutate(gene = ifelse(ttest_p < 1.031763e-03, X, NA))
+
+all_mito %>% ggplot(aes(x = X, y = -log10(ttest_p), color = cancer, label = gene)) +
+  geom_point() +
+  geom_text_repel(color = "black", size = 3) + 
+  theme( axis.text.x=element_blank(),
+         axis.title.x=element_blank(),
+         legend.position="none"
+         ) +
+  scale_color_manual(values = alpha(c('black','forestgreen', 'red2', 'yellowgreen', 'orange',
+                'magenta', 'tan4', "tan2",'firebrick4', "gainsboro", 'lightsalmon', 'tan3',
+                'wheat4', "#7CE3D8", 'mediumvioletred','cadetblue1' ,'darkblue', "tomato3", 'cornflowerblue'), .3)) +
+  facet_wrap(. ~cancer)
+
+
+ggsave(file = "../figures/mutation_analysis_facet_cancer.png", dev = "png", width = 7, height = 6)
+```
+1 mitoxcore / 0 mitoscore = foldchange
+```{r}
+all_mito <- all_mito %>%
+  mutate(fold_change = X1/X0,
+         gene = ifelse((ttest_p < 0.01) & (fold_change < 0.975 | fold_change > 1.025), X, NA))
+
+all_mito %>% ggplot(aes(x = fold_change, y =  -log10(ttest_p), color = cancer, label = gene)) +
+  geom_point() +
+  ylim(0, 8) +
+  geom_text_repel(color = "black", size = 3) + 
+  scale_color_manual(values = alpha(c('black','forestgreen', 'red2', 'yellowgreen', 'orange',
+                'magenta', 'tan4', "tan2",'firebrick4', "gainsboro", 'lightsalmon', 'tan3',
+                'wheat4', "#7CE3D8", 'mediumvioletred','cadetblue1' ,'darkblue', "tomato3", 'cornflowerblue'), .3)) +
+  geom_vline(xintercept =  0.975, linetype="dotted") +
+  geom_vline(xintercept =  1.025, linetype = "dotted") + 
+  geom_hline(yintercept =  2, linetype = "dotted")
+
+#gsave(file = "../figures/mutation_analysis_volcano.png", dev = "png", width = 7, height = 6)
+```
+
+```{r}
+all_mito <- all_mito %>%
+  mutate(fold_change = X1/X0,
+         gene = ifelse((ttest_p < 0.01) & (fold_change < 0.975 | fold_change > 1.025), X, NA))
+
+all_mito %>% ggplot(aes(x = fold_change, y =  -log10(ttest_p), color = cancer, label = gene)) +
+  geom_point() +
+  geom_text_repel(color = "black", size = 3) + 
+  scale_color_manual(values = alpha(c('black','forestgreen', 'red2', 'yellowgreen', 'orange',
+                'magenta', 'tan4', "tan2",'firebrick4', "gainsboro", 'lightsalmon', 'tan3',
+                'wheat4', "#7CE3D8", 'mediumvioletred','cadetblue1' ,'darkblue', "tomato3", 'cornflowerblue'), .3)) +
+  geom_vline(xintercept =  0.975, linetype="dotted") +
+  geom_vline(xintercept =  1.025, linetype = "dotted") + 
+  geom_hline(yintercept =  2, linetype = "dotted") +
+  facet_wrap(. ~cancer, scales = "free")
+
+ggsave(file = "../figures/mutation_analysis_volcano_faceted.png", dev = "png", width = 12, height = 9)
+```
+
+
+
+
+
