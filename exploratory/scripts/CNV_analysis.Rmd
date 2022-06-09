@@ -1,0 +1,99 @@
+---
+title: "CNV analysis"
+author: "Caroline Wheeler"
+date: '2022-05-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(ggrepel)
+library(purrr)
+
+source("00-paths.R")
+```
+
+read in gene list
+```{r}
+genes <- read.csv("../data/TableS1_signature-gene-sets.csv") %>%
+  select(Core.Mitoscore) %>%
+  filter(Core.Mitoscore != "")
+
+genes <- genes[-1,]
+
+#add mispelled gene to list
+genes <- append(genes, "SDHC")
+```
+
+read in CNA data and filter to gene set
+```{r}
+cna_files <- data.frame(files = list.files("/fs/ess/PAS1695/projects/mitoscore/cna_data", full.names = TRUE))
+
+read_cna <- function(table){
+  read.table(table, header = TRUE, fill = TRUE) %>%
+    filter(Hugo_Symbol %in% genes) %>%
+    select(-Entrez_Gene_Id) 
+}
+
+cna <- lapply(X = cna_files$files, read_cna) %>%
+  reduce(full_join, by = "Hugo_Symbol") 
+```
+
+read in mitoscore data
+```{r}
+x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+  
+mitoscore.files <- x %>%
+  filter(grepl("OXPHOS", files))
+```
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+           # cancer = toupper(cancer)) 
+}
+```
+
+```{r}
+mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows() 
+```
+
+cna wide -> long
+```{r}
+cna <- melt(setDT(cna), id.vars = c("Hugo_Symbol"), variable.name = "sampleID")
+```
+```{r}
+cna_mito <- merge(cna, mitoscore)
+```
+
+```{r}
+cna_mito$value <- factor(cna_mito$value, levels = c("-2", "-1", "0", "1" , "2"))
+
+cna_mito %>%
+  ggplot(aes(x=value, y=AvgExpr)) +
+  geom_boxplot(color="red", fill="orange", alpha=0.2) +
+  facet_wrap(~Hugo_Symbol) +
+  theme_bw() +
+  xlab("CNA") 
+
+ggsave("../figures/CNA_analysis_boxplot.png", dpi = 400, width = 8, height = 8)
+```
+
+
+
+
+
