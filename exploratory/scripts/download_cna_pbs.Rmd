@@ -1,0 +1,48 @@
+---
+title: "download cna"
+author: "Caroline Wheeler"
+date: "6/8/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+get cancer list
+```{r}
+cancers <- readRDS("~/Github/mitoscore/exploratory/data/order-cancers-lollipop.RDS")
+cancers <- tolower(cancers)
+```
+
+
+```{r}
+# For loop over all cancers
+  for (c in cancers) {
+    
+    # Write pbs submission file
+    fileConn<-file(paste0("/fs/ess/PAS1695/projects/mitoscore/", c, 
+                        "_cna.pbs"))
+    writeLines(c(paste("#!/bin/bash"),
+                  paste0("#PBS -N cna_download_", c, sep = "_"),
+                 "#PBS -l walltime=8:00:00",
+                 "#PBS -l nodes=1:ppn=48",
+                 "#PBS -j oe",
+                 "#PBS -m e",
+                 "#PBS -A PAS1695",
+                 "",
+
+                 paste0("wget https://cbioportal-datahub.s3.amazonaws.com/", c, "_tcga_pan_cancer_atlas_2018.tar.gz -P /fs/ess/PAS1695/projects/mitoscore/CNA_download"),
+                 
+                 ""),
+               
+               fileConn
+    )
+    
+}
+```
+
+
+
+
+
