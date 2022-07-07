@@ -1,0 +1,89 @@
+---
+title: "check individual genes"
+author: "Caroline Wheeler"
+date: "6/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(purrr)
+library(data.table)
+```
+
+read in gene list
+```{r}
+genes <- read.csv("../data/TableS1_signature-gene-sets.csv") %>%
+  select(Core.Mitoscore) %>%
+  filter(Core.Mitoscore != "")
+
+genes <- genes[-1,]
+
+#add mispelled gene to list
+genes <- append(genes, "SDHC")
+```
+
+read in CNA data and filter to gene set
+```{r}
+read_cna <- function(table){
+  read.table(table, header = TRUE, fill = TRUE) %>%
+    filter(Hugo_Symbol %in% genes) %>%
+    select(-Entrez_Gene_Id) 
+}
+
+cna_files <- data.frame(files = list.files("/fs/ess/PAS1695/projects/mitoscore/cna_data", full.names = TRUE))
+
+cna <- lapply(X = cna_files$files, read_cna) %>%
+  reduce(full_join, by = "Hugo_Symbol") 
+```
+
+get gene expression files paths
+```{r}
+expr_files <- data.frame(files = list.files(file.path("/fs/ess/PAS1695/projects/mitoscore"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\_2018", files)) %>%
+  mutate(files = paste0(files, "/data_RNA_Seq_v2_expression_median.txt"))
+
+read_expr <- function(table){
+  read.delim(table, header = TRUE, sep = "\t") %>%
+    filter(Hugo_Symbol %in% genes) %>%
+    select(-Entrez_Gene_Id) 
+}
+
+expr <- lapply(X = expr_files$files, read_expr) %>%
+  reduce(full_join, by = "Hugo_Symbol") 
+```
+
+Transform data and merge 
+```{r}
+cna <- melt(setDT(cna), id.vars = c("Hugo_Symbol"), variable.name = "sampleID")
+expr <- melt(setDT(expr), id.vars = c("Hugo_Symbol"), variable.name = "sampleID") %>%
+  rename(expression = value)
+
+cna_expr <- merge(cna, expr)
+```
+
+Plot 
+```{r}
+cna_expr$value <- factor(cna_expr$value, levels = c("-2", "-1", "0", "1" , "2"))
+
+cna_expr <- cna_expr %>%
+  filter(Hugo_Symbol %in% c("NDUFB5", "NDUFS6", "SDHA"))
+
+cna_expr %>%
+  ggplot(aes(x=value, y=expression)) +
+  geom_boxplot() +
+  facet_wrap(~Hugo_Symbol) +
+  theme_bw() +
+  xlab("CNA") 
+
+#ggsave("../figures/CNA_analysis_boxplot.png", dpi = 400, width = 8, height = 8)
+```
+
+
+
+
+
