@@ -1,0 +1,30 @@
+---
+title: "CNV analysis buffa"
+author: "Caroline Wheeler"
+date: '2022-07-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(ggrepel)
+library(purrr)
+
+source("00-paths.R")
+```
+
+read in gene list
+```{r}
+genes <- read.csv("../data/TableS1_signature-gene-sets.csv") %>%
+  select(Core.Mitoscore) %>%
+  filter(Core.Mitoscore != "")
+
+genes <- genes[-1,]
+
+#add mispelled gene to list
+genes <- append(genes, "SDHC")
+```

@@ -31,7 +31,7 @@ genes <- append(genes, "SDHC")
 
 read in CNA data and filter to gene set
 ```{r}
-cna_files <- data.frame(files = list.files("/fs/ess/PAS1695/projects/mitoscore/cna_data", full.names = TRUE))
+cna_files <- data.frame(files = list.files(file.path(paths$drive, "data", "cna_data"), full.names = TRUE))
 
 read_cna <- function(table){
   read.table(table, header = TRUE, fill = TRUE) %>%
@@ -45,7 +45,7 @@ cna <- lapply(X = cna_files$files, read_cna) %>%
 
 read in mitoscore data
 ```{r}
-x <- data.frame(files = list.files(file.path(paths$box, "data", "many-cancers"), 
+x <- data.frame(files = list.files(file.path(paths$drive, "data", "many-cancers"), 
                                    full.names = TRUE)) %>%
   filter(grepl("\\.txt", files)) %>%
   filter(grepl("MaxLimitsall", files))
