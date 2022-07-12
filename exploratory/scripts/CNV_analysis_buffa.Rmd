@@ -94,3 +94,13 @@ cna_buffa %>%
 
 ggsave("../figures/CNA_analysis_buffa_boxplot_all_genes.png", dpi = 400, width = 15, height = 20)
 ```
+
+check which genes were dropped
+```{r}
+cna_genes <- cna_buffa$Hugo_Symbol %>% unique()
+
+print(noquote(setdiff(genes, cna_genes)))
+
+x <- as.data.frame(setdiff(genes, cna_genes))
+```
+
