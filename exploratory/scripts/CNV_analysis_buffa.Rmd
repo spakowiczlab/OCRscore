@@ -20,8 +20,9 @@ source("00-paths.R")
 read in gene list
 ```{r}
 genes <- read.csv("../data/TableS1_signature-gene-sets.csv") %>%
-  select(Core.Mitoscore) %>%
-  filter(Core.Mitoscore != "")
+  # change select and filter inout based on gene set
+  select(WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA) %>%
+  filter(WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA != "")
 
 genes <- genes[-1,]
 
@@ -91,5 +92,5 @@ cna_buffa %>%
   theme_bw() +
   xlab("CNA") 
 
-ggsave("../figures/CNA_analysis_buffa_boxplot.png", dpi = 400, width = 8, height = 8)
+ggsave("../figures/CNA_analysis_buffa_boxplot_all_genes.png", dpi = 400, width = 15, height = 20)
 ```
