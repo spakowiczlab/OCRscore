@@ -27,7 +27,7 @@ genes <- read.csv("../data/TableS1_signature-gene-sets.csv") %>%
 genes <- genes[-1,]
 
 #add mispelled gene to list
-genes <- append(genes, "SDHC")
+genes <- append(genes, c("SDHC", "MIR3607", "ATP5O", "ATP5S", "ATP5J", "ATP5H", "ATP5F1", "ATP5A1", "ATPM","ATP5AL2", "ATP5B", "ATPSB", "ATP5C", "ATP5C1", "ATP5CL1", "ATP5D", "ATP5E", "ATPIF1", "ATP5G", "ATP5G1", "ATP5G2", "ATP5G3", "ATP5I", "ATP5J2", "ATP5L"))
 ```
 
 read in CNA data and filter to gene set
@@ -102,5 +102,9 @@ cna_genes <- cna_buffa$Hugo_Symbol %>% unique()
 print(noquote(setdiff(genes, cna_genes)))
 
 x <- as.data.frame(setdiff(genes, cna_genes))
+```
+
+```{r}
+
 ```
 
