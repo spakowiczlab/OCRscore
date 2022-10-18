@@ -13,6 +13,8 @@ library(data.table)
 library(ggplot2)
 library(ggrepel)
 library(purrr)
+library(MASS)
+library(broom)
 
 source("00-paths.R")
 ```
@@ -95,16 +97,76 @@ cna_buffa %>%
 ggsave("../figures/CNA_analysis_buffa_boxplot_all_genes.png", dpi = 400, width = 15, height = 20)
 ```
 
-check which genes were dropped
+<!-- check which genes were dropped -->
+<!-- ```{r} -->
+<!-- cna_genes <- cna_buffa$Hugo_Symbol %>% unique() -->
+
+<!-- print(noquote(setdiff(genes, cna_genes))) -->
+
+<!-- x <- as.data.frame(setdiff(genes, cna_genes)) -->
+<!-- ``` -->
+
+## heatmap to compare ##
+
+expr level ~ cna category
+
+# using group by and do
+# trouble ascessing elements??
 ```{r}
-cna_genes <- cna_buffa$Hugo_Symbol %>% unique()
+models = cna_buffa %>% group_by(Hugo_Symbol) %>% do(m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = ., Hess = TRUE))
+```
 
-print(noquote(setdiff(genes, cna_genes)))
+# for loop 
+```{r}
+gene <- cna_buffa %>%
+  dplyr::select(Hugo_Symbol) %>%
+  distinct()
 
-x <- as.data.frame(setdiff(genes, cna_genes))
+geneNames <- gene$Hugo_Symbol
+
+output <- data.frame(matrix(ncol = 5, nrow = 0))
+#provide column names
+colnames(output) <- c('Value', 'Std. Error', 't value', 'p value', 'gene')
+
+for (g in geneNames) {
+  temp <- cna_buffa %>%
+    dplyr::filter(Hugo_Symbol == g)
+  
+  m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = temp, Hess = TRUE)
+  ctable <- coef(summary(m))
+  p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+  ctable <- cbind(ctable, "p value" = p)
+  
+  df <- data.frame(matrix(ncol = 1, nrow = 5))
+  colnames(df) <- c("gene")
+  df$gene <- as.character(g)
+  
+  ctable <- cbind(ctable, df)
+  
+  output <- rbind(output, ctable)
+  
+}
+```
+
+filter to buffa hypoxia score
+```{r}
+filt_output <- output %>%
+  filter(grepl("BUFFA", rownames(output)))
+
+filt_output$test <- ""
 ```
 
 ```{r}
+ggplot(filt_output, aes(x=test , y=gene, fill=Value)) +
+ geom_tile(color = "black") +
+    scale_fill_gradient2(low = "#075AFF",
+                       mid = "#FFFFCC",
+                       high = "#FF0000") +
+  xlab("") +
+  ylab("") 
 
+ggsave("../figures/all_cancers_heatmap.png", dev = "png", width = 4, height = 10, dpi = 600)
 ```
+
+
 
