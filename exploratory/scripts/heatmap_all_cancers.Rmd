@@ -1,0 +1,48 @@
+---
+title: "mitoscore modeling"
+author: "Caroline Wheeler"
+date: '2022-11-18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+
+source("00-paths.R")
+```
+
+read in cna buffa table with 93 gene matches
+```{r}
+df <- readRDS("../data/cna_buffa.rds")
+```
+
+expr level ~ cna category
+
+# need to split by cancer
+
+# using group by and do
+```{r}
+models = cna_buffa %>% group_by(Hugo_Symbol) %>% do(m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = ., Hess = TRUE))
+```
+
+filter to buffa hypoxia score
+```{r}
+filt_output <- output %>%
+  filter(grepl("BUFFA", rownames(output)))
+
+filt_output$test <- ""
+```
+
+```{r}
+ggplot(filt_output, aes(x=test , y=gene, fill=Value)) +
+ geom_tile(color = "black") +
+    scale_fill_gradient2(low = "#075AFF",
+                       mid = "#FFFFCC",
+                       high = "#FF0000") +
+  xlab("") +
+  ylab("") 
+```
+

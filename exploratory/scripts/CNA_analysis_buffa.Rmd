@@ -22,6 +22,8 @@ source("00-paths.R")
 read in gene list
 ```{r}
 genes <- read.csv("../data/TableS1_signature-gene-sets.csv") %>%
+  select()
+
   # change select and filter inout based on gene set
   select(WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA) %>%
   filter(WP_ELECTRON_TRANSPORT_CHAIN_OXPHOS_SYSTEM_IN_MITOCHONDRIA != "")
@@ -167,6 +169,9 @@ ggplot(filt_output, aes(x=test , y=gene, fill=Value)) +
 
 ggsave("../figures/all_cancers_heatmap.png", dev = "png", width = 4, height = 10, dpi = 600)
 ```
-
+save data 
+```{r}
+saveRDS(cna_buffa, file ="../data/cna_buffa.rds")
+```
 
 
