@@ -22,27 +22,87 @@ df <- readRDS("../data/cna_buffa.rds")
 expr level ~ cna category
 
 # need to split by cancer
+```{r}
+# temporarily remove coadread to see if it fixes
+# df <- df %>%
+#   filter(cancer != "coadread",
+#          cancer != "gbm",
+#          cancer != "kirc",
+#          cancer != "kirp")
+
+split_df <- split(df, f = df$cancer)  
+```
+
+function to model and save important output
+```{r}
+modelBuffa <- function(df){
+  #df <- split_df$ucec
+  
+  gene <- df %>%
+  dplyr::select(Hugo_Symbol) %>%
+  distinct()
+  
+  geneNames <- gene$Hugo_Symbol
+
+  output <- data.frame(matrix(ncol = 5, nrow = 0))
+  #provide column names
+  colnames(output) <- c('Value', 'Std. Error', 't value', 'p value', 'gene')
+  
+  for (g in geneNames) {
+    temp <- df %>%
+      dplyr::filter(Hugo_Symbol == g)
+  
+    m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = temp, Hess = TRUE)
+    ctable <- coef(summary(m))
+    p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+    ctable <- cbind(ctable, "p value" = p)
+  
+    data <- data.frame(matrix(ncol = 1, nrow = 5))
+    colnames(data) <- c("gene")
+    data$gene <- as.character(g)
+  
+    ctable <- cbind(ctable, data)
+  
+    output <- rbind(output, ctable)
+  }
+  filt_output <- output %>%
+  filter(grepl("BUFFA", rownames(output)))
+
+  filt_output$test <- ""
+  filt_output$cancer <- df$cancer %>% unique()
+  
+  return(filt_output)
+  
+  #all_cancers <- rbind(all_cancers, filt_output)
+}
+```
+
+Getting following error with COADREAD, GBM, KIRC, KIRP, PCPG, PRAD, THCA
+Warning: glm.fit: algorithm did not converge
+Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+Error in polr(value ~ BUFFA_HYPOXIA_SCORE, data = temp, Hess = TRUE) : 
+  attempt to find suitable starting values failed
 
 # using group by and do
 ```{r}
-models = cna_buffa %>% group_by(Hugo_Symbol) %>% do(m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = ., Hess = TRUE))
-```
+all_cancers <- data.frame(matrix(ncol = 7, nrow = 0))
+colnames(all_cancers) <- c('Value', 'Std. Error', 't value', 'p value', 'gene', 'test', 'cancer')
 
-filter to buffa hypoxia score
-```{r}
-filt_output <- output %>%
-  filter(grepl("BUFFA", rownames(output)))
-
-filt_output$test <- ""
+for (data in split_df) {
+  temp <- modelBuffa(data)
+  rbind(all_cancers, temp)
+}
 ```
 
 ```{r}
-ggplot(filt_output, aes(x=test , y=gene, fill=Value)) +
+ggplot(all_cancers, aes(x=cancer , y=gene, fill=Value)) +
  geom_tile(color = "black") +
     scale_fill_gradient2(low = "#075AFF",
                        mid = "#FFFFCC",
                        high = "#FF0000") +
   xlab("") +
   ylab("") 
+
+ggsave("../figures/all_cancers_heatmap.png", dev = "png", width = 5, height = 10, dpi = 600)
 ```
 
