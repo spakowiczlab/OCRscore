@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(ggplot2)
+library(MASS)
 
 source("00-paths.R")
 ```
@@ -23,13 +24,6 @@ expr level ~ cna category
 
 # need to split by cancer
 ```{r}
-# temporarily remove coadread to see if it fixes
-# df <- df %>%
-#   filter(cancer != "coadread",
-#          cancer != "gbm",
-#          cancer != "kirc",
-#          cancer != "kirp")
-
 split_df <- split(df, f = df$cancer)  
 ```
 
@@ -52,19 +46,36 @@ modelBuffa <- function(df){
     temp <- df %>%
       dplyr::filter(Hugo_Symbol == g)
   
-    m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = temp, Hess = TRUE)
-    ctable <- coef(summary(m))
-    p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
-    ctable <- cbind(ctable, "p value" = p)
+      tryCatch({
+           # test the call in question
+          m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = temp, Hess = TRUE)
+          ctable <- coef(summary(m))
+          p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+          ctable <- cbind(ctable, "p value" = p)
   
-    data <- data.frame(matrix(ncol = 1, nrow = 5))
-    colnames(data) <- c("gene")
-    data$gene <- as.character(g)
+          data <- data.frame(matrix(ncol = 1, nrow = 5))
+          colnames(data) <- c("gene")
+          data$gene <- as.character(g)
   
-    ctable <- cbind(ctable, data)
+          ctable <- cbind(ctable, data)
+         }, error = function(e) {
+            # handle error event
+           
+            message(e)
+            
+            ctable <- data.frame(matrix(ncol = 5, nrow = 5))
+            colnames(ctable) <- c('Value', 'Std. Error', 't value', 'p value', 'gene')
+            ctable$gene <- as.character(g)
+            ctable$Value <- NA
+            ctable$`Std. Error` <- NA
+            ctable$`p value`<- NA
+            ctable$`t value` <- NA
+         })
   
     output <- rbind(output, ctable)
+    
   }
+  
   filt_output <- output %>%
   filter(grepl("BUFFA", rownames(output)))
 
@@ -90,9 +101,15 @@ colnames(all_cancers) <- c('Value', 'Std. Error', 't value', 'p value', 'gene', 
 
 for (data in split_df) {
   temp <- modelBuffa(data)
-  rbind(all_cancers, temp)
+  all_cancers <- rbind(all_cancers, temp)
 }
 ```
+
+manually remove crazy outlier
+```{r}
+all_cancers <-subset(all_cancers, cancer!="thca" | gene!="COX5A")
+```
+
 
 ```{r}
 ggplot(all_cancers, aes(x=cancer , y=gene, fill=Value)) +
