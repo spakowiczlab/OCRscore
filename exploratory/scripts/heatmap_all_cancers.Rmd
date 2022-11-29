@@ -18,9 +18,11 @@ source("00-paths.R")
 read in cna buffa table with 93 gene matches
 ```{r}
 df <- readRDS("../data/cna_buffa.rds")
-```
 
-expr level ~ cna category
+df = df %>%
+        group_by(cancer, Hugo_Symbol) %>%
+        mutate(z_score = (scale(as.integer(BUFFA_HYPOXIA_SCORE))))
+```
 
 # need to split by cancer
 ```{r}
@@ -47,8 +49,8 @@ modelBuffa <- function(df){
       dplyr::filter(Hugo_Symbol == g)
   
       tryCatch({
-           # test the call in question
-          m = polr(value ~ BUFFA_HYPOXIA_SCORE, data = temp, Hess = TRUE)
+          # test the call in question
+          m = polr(value ~ z_score, data = temp, Hess = TRUE)
           ctable <- coef(summary(m))
           p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
           ctable <- cbind(ctable, "p value" = p)
@@ -77,7 +79,7 @@ modelBuffa <- function(df){
   }
   
   filt_output <- output %>%
-  filter(grepl("BUFFA", rownames(output)))
+  filter(grepl("z_score", rownames(output)))
 
   filt_output$test <- ""
   filt_output$cancer <- df$cancer %>% unique()
@@ -106,8 +108,32 @@ for (data in split_df) {
 ```
 
 manually remove crazy outlier
+# ```{r}
+# all_cancers <-subset(all_cancers, cancer!="thca" | gene!="COX5A")
+# ```
+
+Cluster based on euclidean distance
 ```{r}
-all_cancers <-subset(all_cancers, cancer!="thca" | gene!="COX5A")
+hold <- all_cancers
+all_cancers <- hold
+# Reshape data as matrix
+all_cancers <- all_cancers %>% dplyr::select(-`Std. Error`, -`t value`, -`p value`, -test) 
+cancer <- tidyr::pivot_wider(all_cancers, names_from = "cancer", values_from = "Value")
+cancer<- as.matrix(cancer[, -1]) # -1 to omit categories from matrix
+genes <- tidyr::pivot_wider(all_cancers, names_from = "gene", values_from = "Value")
+genes <- as.matrix(genes[, -1]) # -1 to omit categories from matrix
+
+cancer_names <- colnames(cancer)
+cancer <- matrix(unlist(cancer), ncol=18, byrow=T)
+colnames(cancer) <- cancer_names
+
+gene_names <- colnames(genes)
+genes <- matrix(unlist(genes), ncol=93, byrow=T)
+colnames(genes) <- gene_names
+
+# Cluster based on euclidean distance
+clust_cancer <- hclust(dist(t(cancer)))
+clust_genes <- hclust(dist(t(genes)))
 ```
 
 
@@ -118,8 +144,10 @@ ggplot(all_cancers, aes(x=cancer , y=gene, fill=Value)) +
                        mid = "#FFFFCC",
                        high = "#FF0000") +
   xlab("") +
-  ylab("") 
+  ylab("") +
+  scale_x_discrete(limits = colnames(cancer)[clust_cancer$order]) +
+  scale_y_discrete(limits = colnames(genes)[clust_genes$order])
 
-ggsave("../figures/all_cancers_heatmap.png", dev = "png", width = 5, height = 10, dpi = 600)
+ggsave("../figures/all_cancers_heatmap.png", dev = "png", width = 8, height = 10, dpi = 600)
 ```
 
