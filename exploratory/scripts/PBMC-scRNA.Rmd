@@ -1,0 +1,76 @@
+---
+title: "PBMC-scRNA"
+output: html_document
+date: "2023-04-22"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(tmesig)
+library(BiocManager)
+library(GEOquery)
+```
+
+##load data
+```{r}
+exprA <- read.table("../data/GSE189125_5prime_scRNAseq_seqbatchA_expression.txt")
+##exprB <- read.table("../data/GSE189125_5prime_scRNAseq_seqbatchB_expression.txt")
+
+metaA <- read.table("../data/GSE189125_5prime_scRNAseq_seqbatchA_metadata.txt", sep="\t")
+##metaB <- read.table("../data/GSE189125_5prime_scRNAseq_seqbatchB_metadata.txt")
+```
+
+##format mito input and calculate (expression counts were logged/z-scored)
+```{r}
+mito.input <- exprA %>%
+  rownames_to_column("Gene")
+
+calculateMitoscore <- function(gene_matrix, mito.genes = inputGenes("Mitoscore")){
+  tmp <- gene_matrix %>%
+    dplyr::filter(Gene %in% mito.genes) %>%
+    tidyr::gather(-Gene, key = "sample", value = "counts") %>%
+    dplyr::mutate(logged.count = counts) %>%
+    dplyr::group_by(sample) %>%
+    dplyr::summarise(MitoScore = mean(logged.count))
+
+  return(tmp)
+}
+
+mitoScore <- calculateMitoscore(mito.input)
+```
+
+##format input for boxplot
+```{r}
+exprA.box <- exprA %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("sample") %>%
+  mutate(sample = gsub("([a-zA-Z]+)(-)([0123456789]_[0123456789]+)", "\\1.\\3", sample))
+
+metaA.box <- metaA %>%
+  dplyr::filter(V1 != "barcode") %>%
+  rename(sample = V1, patient.id = V2, Cluster = V3) %>%
+  mutate(sample = gsub("([a-zA-Z]+)(-)([0123456789]_[0123456789]+)", "\\1.\\3", sample)) %>%
+  left_join(mitoScore, by = "sample") 
+
+box.input <- left_join(exprA.box, metaA.box) %>%
+  mutate(group = gsub("([a-zA-Z]+) ([0123456789])", "\\1", Cluster))
+```
+
+##boxplot
+```{r}
+box.input%>%
+  ggplot(aes(x = fct_reorder(group, MitoScore), y = MitoScore)) +
+    geom_boxplot(show.legend = F) +
+    labs(title = "PBMC scRNA", x = "Cell Type", y = "MitoScore") +
+    theme_bw()  +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  ggsave("../figures/PBMC-sc.MitoScore.boxplot.png", height = 3, width = 5)
+```
+
