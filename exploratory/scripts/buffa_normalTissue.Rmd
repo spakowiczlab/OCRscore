@@ -1,0 +1,86 @@
+---
+title: "normal tissue buffa check"
+author: "Caroline Wheeler"
+date: "8/3/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(readr) 
+require(dplyr)
+require(tidyr)
+require(purrr)
+library(tidyverse)
+library(tmesig)
+```
+
+get paths
+```{r}
+data_path <- "/fs/ess/PAS1695/projects/mitoscore/tcga_normal_tissue" 
+files <- dir(data_path, pattern = "*.txt",full.names = TRUE)
+files
+```
+
+read in and combine
+```{r}
+file.list <- lapply(files, function(x) {
+  out <- data.table::fread(x, header = TRUE)
+  out <- out %>%
+    select(-Entrez_Gene_Id) %>%
+    pivot_longer(cols = -Hugo_Symbol, names_to = 'sample') %>% 
+    pivot_wider(names_from = Hugo_Symbol, values_from = value)
+  
+  y <- sub(".*/", "", x)
+  
+  if(grepl("tcga-t", y)){
+    temp <- paste0(sub("-.*", "", y), "-tumor")
+  }else{
+    temp <- sub("-.*", "", y)
+  }
+  
+  out$source <- temp  
+  return(out)
+})
+
+genes <- data.table::rbindlist(file.list, fill = TRUE)
+```
+
+set up for calculateBuffa
+```{r}
+samp.key <- genes %>%
+  select(sample, source)
+
+genes <- genes %>%
+  select(-source) %>%
+  pivot_longer(cols = -sample, names_to = 'Gene') %>%
+  pivot_wider(names_from = sample, values_from = value)
+```
+
+calculate buffa
+```{r}
+buffa <- tmesig::calculateBuffa(genes, buffa.genes = inputGenes("Buffa"))
+```
+
+combine with source
+```{r}
+buffa <- merge(buffa, samp.key)
+```
+
+calculate avg z score
+```{r}
+genes <- genes %>%
+  rename(`Gene.Symbol` = Gene)
+
+z <- calculateAvgZScore(genes, genes = inputGenes("Buffa"))
+```
+
+combine with source
+```{r}
+scores <- merge(buffa, z)
+```
+
+```{r}
+write.csv(scores, file = "/fs/ess/PAS1695/projects/mitoscore/tcga_normal_tissue/buffa_avgZscore.csv", row.names = FALSE)
+```

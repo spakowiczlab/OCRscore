@@ -1,0 +1,79 @@
+---
+title: "plot normal tissue buffa"
+author: "Caroline Wheeler"
+date: "8/4/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+```
+
+read in buffa
+```{r}
+buffa <- read.csv("/fs/ess/PAS1695/projects/mitoscore/tcga_normal_tissue/buffa_avgZscore.csv")
+```
+
+# Calculate the mean buffa for ordering purposes
+```{r}
+mean.buffa <- buffa %>%
+  group_by(source) %>%
+  summarize(mean = mean(buffa.score)) %>%
+  mutate(`Buffa Category` = if_else(mean > 0,
+                             true = "HB",
+                             false = "LB")) %>%
+  mutate(source = fct_reorder(source, mean)) %>%
+  ungroup()
+```
+
+```{r}
+comb.ord <- buffa %>%
+  left_join(mean.buffa) %>%
+  mutate(source = fct_reorder(source, -mean))
+```
+
+
+plot
+```{r}
+comb.ord %>%
+  ggplot(aes(y = buffa.score, x = source)) +
+  gghalves::geom_half_point(
+    aes(color = source),
+    range_scale = .4, 
+    ## add some transparency
+    alpha = .3,
+    side = "l",
+    show.legend = FALSE
+  ) +
+  gghalves::geom_half_boxplot(
+    aes(
+      # color = cancer,
+      color = source,
+    ),
+    side = "l",
+    width = 0.3,
+    show.legend = FALSE
+  ) +
+  ggdist::stat_halfeye(
+    aes(
+      color = source,
+      fill = after_scale(lighten(color, .5))
+    ),
+    shape = 18,
+    point_size = 3,
+    interval_size = 1.8,
+    adjust = .5,
+    .width = c(0, 1),
+    show.legend = FALSE
+  ) +
+  theme_bw() +
+  coord_flip() +
+  scale_color_viridis_d() +
+  labs(y = "Buffa Hypoxia Score",
+       x = "")
+
+ggsave("./figures/raincloud_normalTumor_buffa.png", wdith = 3, height = 6)
+```
+
