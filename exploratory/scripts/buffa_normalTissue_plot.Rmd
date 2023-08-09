@@ -9,11 +9,19 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(ggplot2)
+library(tidyverse)
+library(colorspace)
 ```
 
 read in buffa
 ```{r}
 buffa <- read.csv("/fs/ess/PAS1695/projects/mitoscore/tcga_normal_tissue/buffa_avgZscore.csv")
+```
+
+# rename adjacent normal tissue
+```{r}
+buffa <- buffa %>%
+  mutate(source = ifelse(source %in% c("blca", "brca", "cesc", "chol", "coad", "esca", "hnsc", "kich", "kirc", "kirp", "lihc", "luad", "lusc", "prad", "read", "stad", "thca", "ucec"), paste0("adj.norm-", source), source))
 ```
 
 # Calculate the mean buffa for ordering purposes
@@ -25,7 +33,7 @@ mean.buffa <- buffa %>%
                              true = "HB",
                              false = "LB")) %>%
   mutate(source = fct_reorder(source, mean)) %>%
-  ungroup()
+  ungroup() 
 ```
 
 ```{r}
@@ -34,10 +42,10 @@ comb.ord <- buffa %>%
   mutate(source = fct_reorder(source, -mean))
 ```
 
-
-plot
+plot function 
 ```{r}
-comb.ord %>%
+plotBuffa <- function(comb.ord){
+  plot <- comb.ord %>%
   ggplot(aes(y = buffa.score, x = source)) +
   gghalves::geom_half_point(
     aes(color = source),
@@ -73,7 +81,31 @@ comb.ord %>%
   scale_color_viridis_d() +
   labs(y = "Buffa Hypoxia Score",
        x = "")
-
-ggsave("./figures/raincloud_normalTumor_buffa.png", wdith = 3, height = 6)
+}
 ```
 
+all cancers
+```{r}
+all.cancers <- plotBuffa(comb.ord)
+all.cancers
+ggsave("../figures/raincloud_normalTumor_buffa.png", width = 7, height = 9)
+```
+
+lung alone
+```{r}
+lung <- comb.ord %>%
+  filter(source %in% c("lung", "adj.norm-luad", "adj.norm-lusc", "luad-tumor", "lusc-tumor"))
+
+lung.p <- plotBuffa(lung)
+lung.p
+ggsave("../figures/raincloud_normalTumor_buffa_LUNG.png", width = 5, height = 6)
+```
+esophogus alone
+```{r}
+es <- comb.ord %>%
+  filter(source %in% c("adj.norm-esca", "esca-tumor", "esophagus_mus", "esophagus_gas", "esophagus_muc"))
+
+es.p <- plotBuffa(es)
+es.p
+ggsave("../figures/raincloud_normalTumor_buffa_ESOPHAGUS.png", width = 5, height = 6)
+```
