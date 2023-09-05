@@ -109,3 +109,13 @@ es.p <- plotBuffa(es)
 es.p
 ggsave("../figures/raincloud_normalTumor_buffa_ESOPHAGUS.png", width = 5, height = 6)
 ```
+
+colon alone
+```{r}
+col <- comb.ord %>%
+  filter(source %in% c("colon", "coad-tumor", "read-tumor", "adj.norm-coad", "adj.norm-read"))
+
+col.p <- plotBuffa(col)
+col.p
+ggsave("../figures/raincloud_normalTumor_buffa_COLON.png", width = 3, height = 2)
+```
