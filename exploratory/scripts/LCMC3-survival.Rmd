@@ -1,0 +1,88 @@
+---
+title: "LCMC3 buffa mitoscore survival"
+author: "Caroline Wheeler"
+date: "4/8/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tmesig)
+library(ggplot2)
+library(survminer)
+library(survival)
+library(ggsurvfit)
+```
+
+read in data 
+
+Notes: unsure about clincial variables used...
+using 
+"EVNTDESC" - ALive/Dead
+ADY" = "Analysis Relative Day"
+```{r}
+expr <- read.csv("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.lcpm_batch_effect_norm.shareWithOSU.csv") %>%
+  rename("Gene" = X) 
+
+immune <- read.csv("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.cell_type_enrichment.xCell.shareWithOSU.csv")
+
+clin <- read.csv("/fs/ess/PAS1859/qinma/Genentech/Clinical.2024/clinical_ATE_biom_2024-04-18_masked_OSU.csv") %>%
+  # remove unnecessary PHI
+  select("USUBJID2", "EVNTDESC", "ADY", "PARAMCD")
+```
+
+filter and match uniq ids to clinical data
+```{r}
+expr.sx <- expr %>% select(Gene, contains("Sx"))
+expr.bl <- expr %>% select(Gene, contains("Bl"))
+
+# will need to change the bounds based on which group of samples you are using 
+names(expr.bl)[2:64] <- gsub("_", "-", substring(names(expr.bl)[2:64], 4, 20))
+```
+
+calculate scores
+```{r}
+buffa <- calculateBuffa(expr.bl, buffa.genes = inputGenes("Buffa"))
+mit <- calculateMitoscore(expr.bl, mito.genes = inputGenes("Mitoscore"))
+```
+
+combine and prep data 
+```{r}
+surv.in.buffa <- clin %>%
+  rename("sample" = USUBJID2) %>%
+  mutate("months" = round(ADY/30.417, digit=0),
+         "status" = ifelse(EVNTDESC == "Death", 1, 0)) %>%
+  filter(PARAMCD == "OS") %>%
+  left_join(buffa) %>%
+  filter(!is.na(buffa.score)) %>%
+  mutate(buffa.hi = ifelse(buffa.score > median(buffa.score), "High Buffa", "Low Buffa"))
+
+surv.in.mito <- clin %>%
+  rename("sample" = USUBJID2) %>%
+  mutate("months" = round(ADY/30.417, digit=0),
+         "status" = ifelse(EVNTDESC == "Death", 1, 0)) %>%
+  filter(PARAMCD == "OS") %>%
+  left_join(mit) %>%
+  filter(!is.na(MitoScore)) %>%
+  mutate(mito.hi = ifelse(MitoScore > median(MitoScore), "High Mitoscore", "Low Mitoscore"))
+```
+
+survival analysis
+```{r}
+surv.b <- ggsurvfit::survfit2(Surv(months, status) ~ buffa.hi, data = surv.in.buffa)
+
+surv.b %>%
+  ggsurvfit() +
+  add_pvalue()
+```
+
+```{r}
+surv.m <- ggsurvfit::survfit2(Surv(months, status) ~ mito.hi, data = surv.in.mito)
+
+surv.m %>%
+  ggsurvfit() +
+  add_pvalue()
+```
+
