@@ -100,7 +100,10 @@ surv.b <- ggsurvfit::survfit2(Surv(months, status) ~ buffa.hi, data = surv.in.bu
 
 surv.b %>%
   ggsurvfit() +
-  add_pvalue()
+  add_pvalue() +
+  add_risktable()
+
+ggsave("../figures/km-curve_LCMC3_buffa.png", height = 5, width = 4)
 ```
 basline, mitoscore
 ```{r}
@@ -108,8 +111,13 @@ surv.m <- ggsurvfit::survfit2(Surv(months, status) ~ mito.hi, data = surv.in.mit
 
 surv.m %>%
   ggsurvfit() +
-  add_pvalue()
+  add_pvalue() +
+  add_risktable()
+
+ggsave("../figures/km-curve_LCMC3_mito.png", height = 5, width = 4)
 ```
+
+
 post trt, buffa
 ```{r}
 surv.b.sx <- ggsurvfit::survfit2(Surv(months, status) ~ buffa.hi, data = surv.in.buffa.sx)
