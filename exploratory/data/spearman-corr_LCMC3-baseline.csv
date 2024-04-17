@@ -1,0 +1,135 @@
+"immune.cell","score","corr"
+"aDC","buffa.score",-0.0919987798340238
+"Adipocytes","buffa.score",-0.393672760219707
+"Astrocytes","buffa.score",-0.0862562055516088
+"B-cells","buffa.score",-0.410027127100137
+"Basophils","buffa.score",0.0543710794013962
+"CD4+ memory T-cells","buffa.score",0.128013369350671
+"CD4+ naive T-cells","buffa.score",-0.44435373032365
+"CD4+ T-cells","buffa.score",-0.275901105845907
+"CD4+ Tcm","buffa.score",-0.539533993428776
+"CD4+ Tem","buffa.score",-0.159739505902246
+"CD8+ naive T-cells","buffa.score",0.371756963668821
+"CD8+ T-cells","buffa.score",-0.398658844356134
+"CD8+ Tcm","buffa.score",-0.179662895836843
+"CD8+ Tem","buffa.score",-0.300965442751608
+"cDC","buffa.score",-0.126996749081588
+"Chondrocytes","buffa.score",-0.394338490117133
+"Class-switched memory B-cells","buffa.score",-0.570439635877071
+"CLP","buffa.score",0.630828186945465
+"CMP","buffa.score",-0.322088500429274
+"DC","buffa.score",-0.141425181899531
+"Endothelial cells","buffa.score",-0.32919336712817
+"Eosinophils","buffa.score",-0.392830945118838
+"Epithelial cells","buffa.score",0.333957972854421
+"Erythrocytes","buffa.score",0.241641617867179
+"Fibroblasts","buffa.score",-0.484489427348582
+"GMP","buffa.score",-0.206319602117298
+"Hepatocytes","buffa.score",-0.345264476056677
+"HSC","buffa.score",-0.370253052835938
+"iDC","buffa.score",-0.150368762861877
+"Keratinocytes","buffa.score",0.594437024687359
+"ly Endothelial cells","buffa.score",-0.414790673842061
+"Macrophages","buffa.score",0.108068540593544
+"Macrophages M1","buffa.score",0.110748163124456
+"Macrophages M2","buffa.score",-0.124968510715754
+"Mast cells","buffa.score",-0.230944838109635
+"Megakaryocytes","buffa.score",-0.25385218303653
+"Melanocytes","buffa.score",-0.292977147638444
+"Memory B-cells","buffa.score",-0.269947857086397
+"MEP","buffa.score",0.524599881639999
+"Mesangial cells","buffa.score",0.120942273456928
+"Monocytes","buffa.score",-0.206640770118092
+"MPP","buffa.score",0.0642871614009091
+"MSC","buffa.score",-0.0294690288886436
+"mv Endothelial cells","buffa.score",-0.274356736828226
+"Myocytes","buffa.score",-0.311727164087443
+"naive B-cells","buffa.score",-0.273104869359414
+"Neurons","buffa.score",-0.447703300428412
+"Neutrophils","buffa.score",-0.0365734939116725
+"NK cells","buffa.score",-0.0382343840970876
+"NKT","buffa.score",-0.327632270332569
+"Osteoblast","buffa.score",0.529462241278029
+"pDC","buffa.score",0.000519285500889721
+"Pericytes","buffa.score",-0.329121777909064
+"Plasma cells","buffa.score",-0.102616176580893
+"Platelets","buffa.score",-0.127608633322342
+"Preadipocytes","buffa.score",-0.21607172248743
+"pro B-cells","buffa.score",0.207196714755476
+"Sebocytes","buffa.score",0.587814401869336
+"Skeletal muscle","buffa.score",-0.281282812140229
+"Smooth muscle","buffa.score",0.452288724318488
+"Tgd cells","buffa.score",-0.105864344703912
+"Th1 cells","buffa.score",0.32774325659636
+"Th2 cells","buffa.score",0.574568909115117
+"Tregs","buffa.score",-0.373140470110425
+"ImmuneScore","buffa.score",-0.279311178044394
+"StromaScore","buffa.score",-0.430877632741058
+"MicroenvironmentScore","buffa.score",-0.378732313744922
+"aDC","MitoScore",-0.13848886328725
+"Adipocytes","MitoScore",-0.236067024758143
+"Astrocytes","MitoScore",-0.286588734390947
+"B-cells","MitoScore",-0.353186607160098
+"Basophils","MitoScore",0.0959266236704412
+"CD4+ memory T-cells","MitoScore",0.278824418015124
+"CD4+ naive T-cells","MitoScore",-0.221193323588619
+"CD4+ T-cells","MitoScore",-0.0879062806216662
+"CD4+ Tcm","MitoScore",-0.486287887638619
+"CD4+ Tem","MitoScore",0.0796497710072375
+"CD8+ naive T-cells","MitoScore",0.50492553696931
+"CD8+ T-cells","MitoScore",-0.205535767758579
+"CD8+ Tcm","MitoScore",0.0304406478559248
+"CD8+ Tem","MitoScore",-0.134064541631314
+"cDC","MitoScore",0.0616839477726575
+"Chondrocytes","MitoScore",-0.178333871167826
+"Class-switched memory B-cells","MitoScore",-0.455375259086521
+"CLP","MitoScore",0.772609447004608
+"CMP","MitoScore",-0.187862635665628
+"DC","MitoScore",0.0056996613030739
+"Endothelial cells","MitoScore",-0.207566193674388
+"Eosinophils","MitoScore",-0.222378530370911
+"Epithelial cells","MitoScore",0.203821044546851
+"Erythrocytes","MitoScore",0.305944991224275
+"Fibroblasts","MitoScore",-0.347824182338052
+"GMP","MitoScore",-0.13355921345505
+"Hepatocytes","MitoScore",-0.201612730638793
+"HSC","MitoScore",-0.0505952380952381
+"iDC","MitoScore",0.0876056067588326
+"Keratinocytes","MitoScore",0.390552995391705
+"ly Endothelial cells","MitoScore",-0.278868784144243
+"Macrophages","MitoScore",0.182747695852535
+"Macrophages M1","MitoScore",0.142138802559229
+"Macrophages M2","MitoScore",0.118905036791358
+"Mast cells","MitoScore",-0.161394076322495
+"Megakaryocytes","MitoScore",0.0266413126895822
+"Melanocytes","MitoScore",-0.123925676975946
+"Memory B-cells","MitoScore",-0.227286074260965
+"MEP","MitoScore",0.558512679992639
+"Mesangial cells","MitoScore",-0.0271126674501656
+"Monocytes","MitoScore",-0.118000728781949
+"MPP","MitoScore",0.127211960691797
+"MSC","MitoScore",-0.16802770635914
+"mv Endothelial cells","MitoScore",-0.256445966961846
+"Myocytes","MitoScore",-0.0453808956711623
+"naive B-cells","MitoScore",-0.240593545134464
+"Neurons","MitoScore",-0.113166782708975
+"Neutrophils","MitoScore",0.03554257241695
+"NK cells","MitoScore",0.25573137328463
+"NKT","MitoScore",-0.450194422293979
+"Osteoblast","MitoScore",0.545093018180697
+"pDC","MitoScore",0.0159040925892943
+"Pericytes","MitoScore",-0.447538012921207
+"Plasma cells","MitoScore",-0.17424806289839
+"Platelets","MitoScore",0.00505280446828218
+"Preadipocytes","MitoScore",-0.19778374478545
+"pro B-cells","MitoScore",0.165664535778807
+"Sebocytes","MitoScore",0.499045927526426
+"Skeletal muscle","MitoScore",-0.367069154447156
+"Smooth muscle","MitoScore",0.626543617360034
+"Tgd cells","MitoScore",0.0995402480251589
+"Th1 cells","MitoScore",0.131271910442555
+"Th2 cells","MitoScore",0.481288560561059
+"Tregs","MitoScore",-0.341431372017171
+"ImmuneScore","MitoScore",-0.135416666666667
+"StromaScore","MitoScore",-0.316499448302858
+"MicroenvironmentScore","MitoScore",-0.180011520737327

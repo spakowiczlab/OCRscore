@@ -7,6 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(tmesig)
 ```
 
 ```{r}
@@ -113,5 +117,9 @@ sx %>%
 ggsave("../figures/heatmap_LCMC3-post.png", height = 25, width = 8)
 ```
 
-
+save correlations in table
+```{r}
+write.csv(bl, "../data/spearman-corr_LCMC3-baseline.csv", row.names = F)
+write.csv(sx, "../data/spearman-corr_LCMC3-post.csv", row.names = F)
+```
 
