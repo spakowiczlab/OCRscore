@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggplot2)
 library(tmesig)
+library(broom)
+library(psych)
 ```
 
 ```{r}
@@ -54,36 +56,69 @@ immune.sx <- immune %>%
   rownames_to_column("sample")
 ```
 
-prep for correlation
+correlation
 ```{r}
-# baseline
 bl <- immune.bl %>%
   left_join(buffa) %>%
   left_join(mit) %>%
-  select(-sample) %>%
-  cor(method = "spearman") %>%
-  as.data.frame() %>%
-  rownames_to_column("immune.cell") %>%
-  gather("score", "corr", -immune.cell) %>%
-  filter(score %in% c("buffa.score", "MitoScore"),
-         !immune.cell %in% c("buffa.score", "MitoScore"))
+  select(-sample)
 
-# post trt
-sx <- immune.sx %>%
-  left_join(buffa.sx) %>%
-  left_join(mit.sx) %>%
-  select(-sample) %>%
-  cor(method = "spearman") %>%
-  as.data.frame() %>%
-  rownames_to_column("immune.cell") %>%
-  gather("score", "corr", -immune.cell) %>%
-  filter(score %in% c("buffa.score", "MitoScore"),
-         !immune.cell %in% c("buffa.score", "MitoScore"))
+bl.corr <- lapply(colnames(bl), function(x) 
+    lapply(c("buffa.score", "MitoScore"), function(y) cor.test(bl[[x]], bl[[y]], 
+                                            method = "spearman", exact = F) %>%
+             tidy() %>%
+             mutate(immune.cell = x, score = y) %>%
+             bind_rows())) %>%
+    bind_rows() %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr"),
+         corr = ifelse(p.adj < 0.05, estimate, NA))
+
+sx <- immune.sx %>% 
+  left_join(buffa.sx) %>% 
+  left_join(mit.sx) %>% 
+  select(-sample)
+
+sx.corr <- lapply(colnames(sx), function(x) 
+    lapply(c("buffa.score", "MitoScore"), function(y) cor.test(sx[[x]], sx[[y]], 
+                                            method = "spearman", exact = F) %>%
+             tidy() %>%
+             mutate(immune.cell = x, score = y) %>%
+             bind_rows())) %>%
+    bind_rows() %>%
+  mutate(p.adj = p.adjust(p.value, method = "fdr"),
+         corr = ifelse(p.adj < 0.05, estimate, NA))
 ```
+
+<!-- old version w/o p-val  -->
+<!-- ```{r} -->
+<!-- # baseline -->
+<!-- bl <- immune.bl %>% -->
+<!--   left_join(buffa) %>% -->
+<!--   left_join(mit) %>% -->
+<!--   select(-sample) %>% -->
+<!--   cor(method = "spearman") %>% -->
+<!--   as.data.frame() %>% -->
+<!--   rownames_to_column("immune.cell") %>% -->
+<!--   gather("score", "corr", -immune.cell) %>% -->
+<!--   filter(score %in% c("buffa.score", "MitoScore"), -->
+<!--          !immune.cell %in% c("buffa.score", "MitoScore")) -->
+
+<!-- # post trt -->
+<!-- sx <- immune.sx %>% -->
+<!--   left_join(buffa.sx) %>% -->
+<!--   left_join(mit.sx) %>% -->
+<!--   select(-sample) %>% -->
+<!--   cor(method = "spearman") %>% -->
+<!--   as.data.frame() %>% -->
+<!--   rownames_to_column("immune.cell") %>% -->
+<!--   gather("score", "corr", -immune.cell) %>% -->
+<!--   filter(score %in% c("buffa.score", "MitoScore"), -->
+<!--          !immune.cell %in% c("buffa.score", "MitoScore")) -->
+<!-- ``` -->
 
 baseline plot
 ```{r}
-bl %>%
+bl.corr %>%
   ggplot(aes(x=score, y=reorder(immune.cell, corr), fill=corr)) + 
   geom_tile(color = "white") +
   scale_fill_gradient2(low = "#075AFF",
@@ -94,14 +129,15 @@ bl %>%
   ylab("") +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1),
         aspect.ratio = 10,
-        text = element_text(size = 20)) 
+        text = element_text(size = 20)) +
+  ggtitle("Baseline")
 
 ggsave("../figures/heatmap_LCMC3-baseline.png", height = 25, width = 8)
 ```
 
 post trt plot
 ```{r}
-sx %>%
+sx.corr %>%
   ggplot(aes(x=score, y=reorder(immune.cell, corr), fill=corr)) + 
   geom_tile(color = "white") +
   scale_fill_gradient2(low = "#075AFF",
@@ -112,14 +148,15 @@ sx %>%
   ylab("") +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1),
         aspect.ratio = 10,
-        text = element_text(size = 20)) 
+        text = element_text(size = 20)) +
+  ggtitle("Post Treatment")
 
 ggsave("../figures/heatmap_LCMC3-post.png", height = 25, width = 8)
 ```
 
 save correlations in table
 ```{r}
-write.csv(bl, "../data/spearman-corr_LCMC3-baseline.csv", row.names = F)
-write.csv(sx, "../data/spearman-corr_LCMC3-post.csv", row.names = F)
+write.csv(bl.corr, "../data/spearman-corr_LCMC3-baseline.csv", row.names = F)
+write.csv(sx.corr, "../data/spearman-corr_LCMC3-post.csv", row.names = F)
 ```
 

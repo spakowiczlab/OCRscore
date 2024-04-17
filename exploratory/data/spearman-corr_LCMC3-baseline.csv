@@ -1,135 +1,139 @@
-"immune.cell","score","corr"
-"aDC","buffa.score",-0.0919987798340238
-"Adipocytes","buffa.score",-0.393672760219707
-"Astrocytes","buffa.score",-0.0862562055516088
-"B-cells","buffa.score",-0.410027127100137
-"Basophils","buffa.score",0.0543710794013962
-"CD4+ memory T-cells","buffa.score",0.128013369350671
-"CD4+ naive T-cells","buffa.score",-0.44435373032365
-"CD4+ T-cells","buffa.score",-0.275901105845907
-"CD4+ Tcm","buffa.score",-0.539533993428776
-"CD4+ Tem","buffa.score",-0.159739505902246
-"CD8+ naive T-cells","buffa.score",0.371756963668821
-"CD8+ T-cells","buffa.score",-0.398658844356134
-"CD8+ Tcm","buffa.score",-0.179662895836843
-"CD8+ Tem","buffa.score",-0.300965442751608
-"cDC","buffa.score",-0.126996749081588
-"Chondrocytes","buffa.score",-0.394338490117133
-"Class-switched memory B-cells","buffa.score",-0.570439635877071
-"CLP","buffa.score",0.630828186945465
-"CMP","buffa.score",-0.322088500429274
-"DC","buffa.score",-0.141425181899531
-"Endothelial cells","buffa.score",-0.32919336712817
-"Eosinophils","buffa.score",-0.392830945118838
-"Epithelial cells","buffa.score",0.333957972854421
-"Erythrocytes","buffa.score",0.241641617867179
-"Fibroblasts","buffa.score",-0.484489427348582
-"GMP","buffa.score",-0.206319602117298
-"Hepatocytes","buffa.score",-0.345264476056677
-"HSC","buffa.score",-0.370253052835938
-"iDC","buffa.score",-0.150368762861877
-"Keratinocytes","buffa.score",0.594437024687359
-"ly Endothelial cells","buffa.score",-0.414790673842061
-"Macrophages","buffa.score",0.108068540593544
-"Macrophages M1","buffa.score",0.110748163124456
-"Macrophages M2","buffa.score",-0.124968510715754
-"Mast cells","buffa.score",-0.230944838109635
-"Megakaryocytes","buffa.score",-0.25385218303653
-"Melanocytes","buffa.score",-0.292977147638444
-"Memory B-cells","buffa.score",-0.269947857086397
-"MEP","buffa.score",0.524599881639999
-"Mesangial cells","buffa.score",0.120942273456928
-"Monocytes","buffa.score",-0.206640770118092
-"MPP","buffa.score",0.0642871614009091
-"MSC","buffa.score",-0.0294690288886436
-"mv Endothelial cells","buffa.score",-0.274356736828226
-"Myocytes","buffa.score",-0.311727164087443
-"naive B-cells","buffa.score",-0.273104869359414
-"Neurons","buffa.score",-0.447703300428412
-"Neutrophils","buffa.score",-0.0365734939116725
-"NK cells","buffa.score",-0.0382343840970876
-"NKT","buffa.score",-0.327632270332569
-"Osteoblast","buffa.score",0.529462241278029
-"pDC","buffa.score",0.000519285500889721
-"Pericytes","buffa.score",-0.329121777909064
-"Plasma cells","buffa.score",-0.102616176580893
-"Platelets","buffa.score",-0.127608633322342
-"Preadipocytes","buffa.score",-0.21607172248743
-"pro B-cells","buffa.score",0.207196714755476
-"Sebocytes","buffa.score",0.587814401869336
-"Skeletal muscle","buffa.score",-0.281282812140229
-"Smooth muscle","buffa.score",0.452288724318488
-"Tgd cells","buffa.score",-0.105864344703912
-"Th1 cells","buffa.score",0.32774325659636
-"Th2 cells","buffa.score",0.574568909115117
-"Tregs","buffa.score",-0.373140470110425
-"ImmuneScore","buffa.score",-0.279311178044394
-"StromaScore","buffa.score",-0.430877632741058
-"MicroenvironmentScore","buffa.score",-0.378732313744922
-"aDC","MitoScore",-0.13848886328725
-"Adipocytes","MitoScore",-0.236067024758143
-"Astrocytes","MitoScore",-0.286588734390947
-"B-cells","MitoScore",-0.353186607160098
-"Basophils","MitoScore",0.0959266236704412
-"CD4+ memory T-cells","MitoScore",0.278824418015124
-"CD4+ naive T-cells","MitoScore",-0.221193323588619
-"CD4+ T-cells","MitoScore",-0.0879062806216662
-"CD4+ Tcm","MitoScore",-0.486287887638619
-"CD4+ Tem","MitoScore",0.0796497710072375
-"CD8+ naive T-cells","MitoScore",0.50492553696931
-"CD8+ T-cells","MitoScore",-0.205535767758579
-"CD8+ Tcm","MitoScore",0.0304406478559248
-"CD8+ Tem","MitoScore",-0.134064541631314
-"cDC","MitoScore",0.0616839477726575
-"Chondrocytes","MitoScore",-0.178333871167826
-"Class-switched memory B-cells","MitoScore",-0.455375259086521
-"CLP","MitoScore",0.772609447004608
-"CMP","MitoScore",-0.187862635665628
-"DC","MitoScore",0.0056996613030739
-"Endothelial cells","MitoScore",-0.207566193674388
-"Eosinophils","MitoScore",-0.222378530370911
-"Epithelial cells","MitoScore",0.203821044546851
-"Erythrocytes","MitoScore",0.305944991224275
-"Fibroblasts","MitoScore",-0.347824182338052
-"GMP","MitoScore",-0.13355921345505
-"Hepatocytes","MitoScore",-0.201612730638793
-"HSC","MitoScore",-0.0505952380952381
-"iDC","MitoScore",0.0876056067588326
-"Keratinocytes","MitoScore",0.390552995391705
-"ly Endothelial cells","MitoScore",-0.278868784144243
-"Macrophages","MitoScore",0.182747695852535
-"Macrophages M1","MitoScore",0.142138802559229
-"Macrophages M2","MitoScore",0.118905036791358
-"Mast cells","MitoScore",-0.161394076322495
-"Megakaryocytes","MitoScore",0.0266413126895822
-"Melanocytes","MitoScore",-0.123925676975946
-"Memory B-cells","MitoScore",-0.227286074260965
-"MEP","MitoScore",0.558512679992639
-"Mesangial cells","MitoScore",-0.0271126674501656
-"Monocytes","MitoScore",-0.118000728781949
-"MPP","MitoScore",0.127211960691797
-"MSC","MitoScore",-0.16802770635914
-"mv Endothelial cells","MitoScore",-0.256445966961846
-"Myocytes","MitoScore",-0.0453808956711623
-"naive B-cells","MitoScore",-0.240593545134464
-"Neurons","MitoScore",-0.113166782708975
-"Neutrophils","MitoScore",0.03554257241695
-"NK cells","MitoScore",0.25573137328463
-"NKT","MitoScore",-0.450194422293979
-"Osteoblast","MitoScore",0.545093018180697
-"pDC","MitoScore",0.0159040925892943
-"Pericytes","MitoScore",-0.447538012921207
-"Plasma cells","MitoScore",-0.17424806289839
-"Platelets","MitoScore",0.00505280446828218
-"Preadipocytes","MitoScore",-0.19778374478545
-"pro B-cells","MitoScore",0.165664535778807
-"Sebocytes","MitoScore",0.499045927526426
-"Skeletal muscle","MitoScore",-0.367069154447156
-"Smooth muscle","MitoScore",0.626543617360034
-"Tgd cells","MitoScore",0.0995402480251589
-"Th1 cells","MitoScore",0.131271910442555
-"Th2 cells","MitoScore",0.481288560561059
-"Tregs","MitoScore",-0.341431372017171
-"ImmuneScore","MitoScore",-0.135416666666667
-"StromaScore","MitoScore",-0.316499448302858
-"MicroenvironmentScore","MitoScore",-0.180011520737327
+"estimate","statistic","p.value","method","alternative","immune.cell","score","p.adj","corr"
+-0.0919987798340238,45497.0371630048,0.473301273248442,"Spearman's rank correlation rho","two.sided","aDC","buffa.score",0.553521828036313,NA
+-0.13848886328725,47434,0.279059053320774,"Spearman's rank correlation rho","two.sided","aDC","MitoScore",0.397011849054297,NA
+-0.393672760219707,58065.9818817939,0.00141257975198544,"Spearman's rank correlation rho","two.sided","Adipocytes","buffa.score",0.00588271684188902,-0.393672760219707
+-0.236067024758143,51499.4965195233,0.0625153425400865,"Spearman's rank correlation rho","two.sided","Adipocytes","MitoScore",0.123244532436171,NA
+-0.0862562055516088,45257.7785481022,0.501467831828669,"Spearman's rank correlation rho","two.sided","Astrocytes","buffa.score",0.571921990019474,NA
+-0.286588734390947,53604.4330296644,0.0227760143211542,"Spearman's rank correlation rho","two.sided","Astrocytes","MitoScore",0.0561266067199871,NA
+-0.410027127100137,58747.3702235001,0.000845764515926765,"Spearman's rank correlation rho","two.sided","B-cells","buffa.score",0.00389051677326312,-0.410027127100137
+-0.353186607160098,56379.1668007183,0.00452096641851394,"Spearman's rank correlation rho","two.sided","B-cells","MitoScore",0.0152169113598762,-0.353186607160098
+0.0543710794013962,39398.6833478202,0.672128585488741,"Spearman's rank correlation rho","two.sided","Basophils","buffa.score",0.742029958379571,NA
+0.0959266236704412,37667.3131513947,0.454536010711461,"Spearman's rank correlation rho","two.sided","Basophils","MitoScore",0.536119397249416,NA
+0.128013369350671,36330.4509793736,0.317383593235513,"Spearman's rank correlation rho","two.sided","CD4+ memory T-cells","buffa.score",0.42224571838944,NA
+0.278824418015124,30047.0594478179,0.0269066579240666,"Spearman's rank correlation rho","two.sided","CD4+ memory T-cells","MitoScore",0.0618853132253531,NA
+-0.44435373032365,60177.5538202046,0.000263975413980406,"Spearman's rank correlation rho","two.sided","CD4+ naive T-cells","buffa.score",0.00134920767145541,-0.44435373032365
+-0.221193323588619,50879.7986339962,0.0814802484247938,"Spearman's rank correlation rho","two.sided","CD4+ naive T-cells","MitoScore",0.151949652467859,NA
+-0.275901105845907,53159.1436739639,0.0286172946508075,"Spearman's rank correlation rho","two.sided","CD4+ T-cells","buffa.score",0.0647407649477283,NA
+-0.0879062806216662,45326.5272758211,0.493286874583745,"Spearman's rank correlation rho","two.sided","CD4+ T-cells","MitoScore",0.568988239030975,NA
+-0.539533993428776,64143.1443022165,5.04574936334499e-06,"Spearman's rank correlation rho","two.sided","CD4+ Tcm","buffa.score",4.97366722958292e-05,-0.539533993428776
+-0.486287887638619,61924.6985505754,5.32954782381335e-05,"Spearman's rank correlation rho","two.sided","CD4+ Tcm","MitoScore",0.000387093473519075,-0.486287887638619
+-0.159739505902246,48319.3867739112,0.211098073025335,"Spearman's rank correlation rho","two.sided","CD4+ Tem","buffa.score",0.313242301908562,NA
+0.0796497710072375,38345.4719407545,0.534910385284829,"Spearman's rank correlation rho","two.sided","CD4+ Tem","MitoScore",0.605062566961528,NA
+0.371756963668821,26175.1178657023,0.0027001723203635,"Spearman's rank correlation rho","two.sided","CD8+ naive T-cells","buffa.score",0.00980588895289901,0.371756963668821
+0.50492553696931,20626.7824277107,2.44150171287854e-05,"Spearman's rank correlation rho","two.sided","CD8+ naive T-cells","MitoScore",0.000198192491986611,0.50492553696931
+-0.398658844356134,58273.722091254,0.00121139225398533,"Spearman's rank correlation rho","two.sided","CD8+ T-cells","buffa.score",0.00539264938870888,-0.398658844356134
+-0.205535767758579,50227.4422278934,0.106088569318647,"Spearman's rank correlation rho","two.sided","CD8+ T-cells","MitoScore",0.183002782074666,NA
+-0.179662895836843,49149.4748921462,0.158844664913275,"Spearman's rank correlation rho","two.sided","CD8+ Tcm","buffa.score",0.251960502965884,NA
+0.0304406478559248,40395.7208477308,0.812787380893328,"Spearman's rank correlation rho","two.sided","CD8+ Tcm","MitoScore",0.85587163959477,NA
+-0.300965442751608,54203.424206803,0.0165360917218497,"Spearman's rank correlation rho","two.sided","CD8+ Tem","buffa.score",0.0422589010669491,-0.300965442751608
+-0.134064541631314,47249.6650625271,0.294853566825986,"Spearman's rank correlation rho","two.sided","CD8+ Tem","MitoScore",0.409437713075412,NA
+-0.126996749081588,46955.1925537353,0.321273916165878,"Spearman's rank correlation rho","two.sided","cDC","buffa.score",0.42224571838944,NA
+0.0616839477726575,39094,0.631046313093073,"Spearman's rank correlation rho","two.sided","cDC","MitoScore",0.702293477474549,NA
+-0.394338490117133,58093.7188522402,0.00138408561259252,"Spearman's rank correlation rho","two.sided","Chondrocytes","buffa.score",0.00588271684188902,-0.394338490117133
+-0.178333871167826,49094.1024083363,0.162000744730885,"Spearman's rank correlation rho","two.sided","Chondrocytes","MitoScore",0.254046622418888,NA
+-0.570439635877071,65430.7969891823,1.05650208197175e-06,"Spearman's rank correlation rho","two.sided","Class-switched memory B-cells","buffa.score",1.32542988465547e-05,-0.570439635877071
+-0.455375259086521,60636.7547945808,0.000176825599163289,"Spearman's rank correlation rho","two.sided","Class-switched memory B-cells","MitoScore",0.00110917875838791,-0.455375259086521
+0.630828186945465,15381.1744191041,2.99654341454445e-08,"Spearman's rank correlation rho","two.sided","CLP","buffa.score",6.89204985345223e-07,0.630828186945465
+0.772609447004608,9474,1.20019567682481e-13,"Spearman's rank correlation rho","two.sided","CLP","MitoScore",5.52090011339413e-12,0.772609447004608
+-0.322088500429274,55083.4952818853,0.0100442055113982,"Spearman's rank correlation rho","two.sided","CMP","buffa.score",0.027722007211459,-0.322088500429274
+-0.187862635665628,49491.1088523727,0.140369398727094,"Spearman's rank correlation rho","two.sided","CMP","MitoScore",0.230606869337369,NA
+-0.141425181899531,47556.3387786621,0.26889225287393,"Spearman's rank correlation rho","two.sided","DC","buffa.score",0.386532613506274,NA
+0.0056996613030739,41426.5293114687,0.964638107915024,"Spearman's rank correlation rho","two.sided","DC","MitoScore",0.975719631589579,NA
+-0.32919336712817,55379.5124480281,0.00842767856432054,"Spearman's rank correlation rho","two.sided","Endothelial cells","buffa.score",0.0246765531187954,-0.32919336712817
+-0.207566193674388,50312.0378932497,0.102606574021684,"Spearman's rank correlation rho","two.sided","Endothelial cells","MitoScore",0.182952528089061,NA
+-0.392830945118838,58030.9084974313,0.00144936501901614,"Spearman's rank correlation rho","two.sided","Eosinophils","buffa.score",0.00588271684188902,-0.392830945118838
+-0.222378530370911,50929.1790893737,0.0798191275898632,"Spearman's rank correlation rho","two.sided","Eosinophils","MitoScore",0.150890953526043,NA
+0.333957972854421,27749.9750189934,0.00747521017519006,"Spearman's rank correlation rho","two.sided","Epithelial cells","buffa.score",0.0229239778705828,0.333957972854421
+0.203821044546851,33172,0.109099731349968,"Spearman's rank correlation rho","two.sided","Epithelial cells","MitoScore",0.18587361637402,NA
+0.241641617867179,31596.2436331818,0.0563985851998247,"Spearman's rank correlation rho","two.sided","Erythrocytes","buffa.score",0.114455952317291,NA
+0.305944991224275,28917.1078856318,0.0147476010070228,"Spearman's rank correlation rho","two.sided","Erythrocytes","MitoScore",0.0383994139428141,0.305944991224275
+-0.484489427348582,61849.7675010513,5.73293757412065e-05,"Spearman's rank correlation rho","two.sided","Fibroblasts","buffa.score",0.000395572692614325,-0.484489427348582
+-0.347824182338052,56155.7467329326,0.0052176746766649,"Spearman's rank correlation rho","two.sided","Fibroblasts","MitoScore",0.0171437882233275,-0.347824182338052
+-0.206319602117298,50260.0999026151,0.104733693616201,"Spearman's rank correlation rho","two.sided","GMP","buffa.score",0.182952528089061,NA
+-0.13355921345505,47228.6110693912,0.296693994982183,"Spearman's rank correlation rho","two.sided","GMP","MitoScore",0.409437713075412,NA
+-0.345264476056677,56049.0991304254,0.00558239032143403,"Spearman's rank correlation rho","two.sided","Hepatocytes","buffa.score",0.0179155782408813,-0.345264476056677
+-0.201612730638793,50063.9928093347,0.113074254624939,"Spearman's rank correlation rho","two.sided","Hepatocytes","MitoScore",0.190295696807824,NA
+-0.370253052835938,57090.2231933565,0.00281842573059006,"Spearman's rank correlation rho","two.sided","HSC","buffa.score",0.00997289104670329,-0.370253052835938
+-0.0505952380952381,43772,0.693730278176087,"Spearman's rank correlation rho","two.sided","HSC","MitoScore",0.759799828478572,NA
+-0.150368762861877,47928.9641358772,0.239468058011472,"Spearman's rank correlation rho","two.sided","iDC","buffa.score",0.351559489421097,NA
+0.0876056067588326,38014,0.494772381766065,"Spearman's rank correlation rho","two.sided","iDC","MitoScore",0.568988239030975,NA
+0.594437024687359,16897.3758034259,2.79807571164143e-07,"Spearman's rank correlation rho","two.sided","Keratinocytes","buffa.score",4.82668060258147e-06,0.594437024687359
+0.390552995391705,25392,0.00155326061455662,"Spearman's rank correlation rho","two.sided","Keratinocytes","MitoScore",0.00612428470882323,0.390552995391705
+-0.414790673842061,58945.8386349556,0.000724810825941861,"Spearman's rank correlation rho","two.sided","ly Endothelial cells","buffa.score",0.00344909979241299,-0.414790673842061
+-0.278868784144243,53282.7890225857,0.0268813744408001,"Spearman's rank correlation rho","two.sided","ly Endothelial cells","MitoScore",0.0618853132253531,NA
+0.108068540593544,37161.4323247106,0.3991928414402,"Spearman's rank correlation rho","two.sided","Macrophages","buffa.score",0.487509841758829,NA
+0.182747695852535,34050,0.15169436744926,"Spearman's rank correlation rho","two.sided","Macrophages","MitoScore",0.246280267152916,NA
+0.110748163124456,37049.7885315826,0.387535142628489,"Spearman's rank correlation rho","two.sided","Macrophages M1","buffa.score",0.477498657881531,NA
+0.142138802559229,35741.9289301723,0.266459339583054,"Spearman's rank correlation rho","two.sided","Macrophages M1","MitoScore",0.386532613506274,NA
+-0.124968510715754,46870.6880304612,0.329125740237109,"Spearman's rank correlation rho","two.sided","Macrophages M2","buffa.score",0.428484454270954,NA
+0.118905036791358,36709.9405471249,0.353314811240857,"Spearman's rank correlation rho","two.sided","Macrophages M2","MitoScore",0.447315999552644,NA
+-0.230944838109635,51286.0857349998,0.0685970358316053,"Spearman's rank correlation rho","two.sided","Mast cells","buffa.score",0.133329449926219,NA
+-0.161394076322495,48388.3227959004,0.206346117434893,"Spearman's rank correlation rho","two.sided","Mast cells","MitoScore",0.309519176152339,NA
+-0.25385218303653,52240.497354034,0.044690323303373,"Spearman's rank correlation rho","two.sided","Megakaryocytes","buffa.score",0.0920487256099324,NA
+0.0266413126895822,40554.0163481012,0.835805910066888,"Spearman's rank correlation rho","two.sided","Megakaryocytes","MitoScore",0.860755340218138,NA
+-0.292977147638444,53870.5998792081,0.0197927132857456,"Spearman's rank correlation rho","two.sided","Melanocytes","buffa.score",0.0496617169715072,-0.292977147638444
+-0.123925676975946,46827.2394055258,0.333209611206736,"Spearman's rank correlation rho","two.sided","Melanocytes","MitoScore",0.429746975201211,NA
+-0.269947857086397,52911.1075176476,0.0323843289861414,"Spearman's rank correlation rho","two.sided","Memory B-cells","buffa.score",0.0698287093763674,NA
+-0.227286074260965,51133.6469980088,0.0732246977778707,"Spearman's rank correlation rho","two.sided","Memory B-cells","MitoScore",0.140347337407585,NA
+0.524599881639999,19807.0705313511,1.01770497946906e-05,"Spearman's rank correlation rho","two.sided","MEP","buffa.score",8.7777054479206e-05,0.524599881639999
+0.558512679992639,18394.1277007867,1.96806772789627e-06,"Spearman's rank correlation rho","two.sided","MEP","MitoScore",2.26327788708071e-05,0.558512679992639
+0.120942273456928,36625.0611186906,0.345068219682461,"Spearman's rank correlation rho","two.sided","Mesangial cells","buffa.score",0.440920502927589,NA
+-0.0271126674501656,42793.6221766437,0.83294229474585,"Spearman's rank correlation rho","two.sided","Mesangial cells","MitoScore",0.860755340218138,NA
+-0.206640770118092,50273.4810462002,0.104182432063879,"Spearman's rank correlation rho","two.sided","Monocytes","buffa.score",0.182952528089061,NA
+-0.118000728781949,46580.3823639711,0.35701399960324,"Spearman's rank correlation rho","two.sided","Monocytes","MitoScore",0.447890290411338,NA
+0.0642871614009091,38985.5397073925,0.616678125109246,"Spearman's rank correlation rho","two.sided","MPP","buffa.score",0.691882774512813,NA
+0.127211960691797,36363.840869737,0.320447837763558,"Spearman's rank correlation rho","two.sided","MPP","MitoScore",0.42224571838944,NA
+-0.0294690288886436,42891.7976196164,0.818659829177606,"Spearman's rank correlation rho","two.sided","MSC","buffa.score",0.85587163959477,NA
+-0.16802770635914,48664.7063577472,0.188055597415777,"Spearman's rank correlation rho","two.sided","MSC","MitoScore",0.288351916037524,NA
+-0.274356736828226,53094.7990832112,0.029557288408216,"Spearman's rank correlation rho","two.sided","mv Endothelial cells","buffa.score",0.0657888032311904,NA
+-0.256445966961846,52348.5647674984,0.0424805913955465,"Spearman's rank correlation rho","two.sided","mv Endothelial cells","MitoScore",0.0900767576673357,NA
+-0.311727164087443,54651.8005645392,0.0128817787870771,"Spearman's rank correlation rho","two.sided","Myocytes","buffa.score",0.0341862590887814,-0.311727164087443
+-0.0453808956711623,43554.7496372433,0.723961936345143,"Spearman's rank correlation rho","two.sided","Myocytes","MitoScore",0.78666730091047,NA
+-0.273104869359414,53042.6412769906,0.0303381260071664,"Spearman's rank correlation rho","two.sided","naive B-cells","buffa.score",0.0664549426823646,NA
+-0.240593545134464,51688.0894644823,0.0575099293998738,"Spearman's rank correlation rho","two.sided","naive B-cells","MitoScore",0.115019858799748,NA
+-0.447703300428412,60317.1103090494,0.000234045406857445,"Spearman's rank correlation rho","two.sided","Neurons","buffa.score",0.00124967618321611,-0.447703300428412
+-0.113166782708975,46378.9808347867,0.377188766431365,"Spearman's rank correlation rho","two.sided","Neurons","MitoScore",0.468937385293048,NA
+-0.0365734939116725,43187.7980503359,0.775969606215211,"Spearman's rank correlation rho","two.sided","Neutrophils","buffa.score",0.830107020602318,NA
+0.03554257241695,40183.1542628202,0.782126779068245,"Spearman's rank correlation rho","two.sided","Neutrophils","MitoScore",0.830257657780137,NA
+-0.0382343840970877,43256.9973790211,0.766078916732059,"Spearman's rank correlation rho","two.sided","NK cells","buffa.score",0.825928832101751,NA
+0.25573137328463,31009.2080634692,0.0430801884495953,"Spearman's rank correlation rho","two.sided","NK cells","MitoScore",0.0900767576673357,NA
+-0.327632270332569,55314.4709111361,0.00876196451319548,"Spearman's rank correlation rho","two.sided","NKT","buffa.score",0.0246765531187954,-0.327632270332569
+-0.450194422293979,60420.9004104564,0.00021383581202604,"Spearman's rank correlation rho","two.sided","NKT","MitoScore",0.00122955591914973,-0.450194422293979
+0.529462241278029,19604.4851793922,8.12835362961569e-06,"Spearman's rank correlation rho","two.sided","Osteoblast","buffa.score",7.47808533924643e-05,0.529462241278029
+0.545093018180697,18953.2444905194,3.85247959208197e-06,"Spearman's rank correlation rho","two.sided","Osteoblast","MitoScore",4.08955525928701e-05,0.545093018180697
+0.000519285500889721,41642.3644888909,0.996777223349955,"Spearman's rank correlation rho","two.sided","pDC","buffa.score",0.996777223349955,NA
+0.0159040925892943,41001.3718863596,0.901541128358416,"Spearman's rank correlation rho","two.sided","pDC","MitoScore",0.92157537565527,NA
+-0.329121777909064,55376.5297548032,0.00844276143750556,"Spearman's rank correlation rho","two.sided","Pericytes","buffa.score",0.0246765531187954,-0.329121777909064
+-0.447538012921207,60310.2237703492,0.000235446237417527,"Spearman's rank correlation rho","two.sided","Pericytes","MitoScore",0.00124967618321611,-0.447538012921207
+-0.102616176580893,45939.4003810663,0.423539101790598,"Spearman's rank correlation rho","two.sided","Plasma cells","buffa.score",0.508246922148717,NA
+-0.17424806289839,48923.8712925985,0.1719922702806,"Spearman's rank correlation rho","two.sided","Plasma cells","MitoScore",0.266684643805874,NA
+-0.127608633322342,46980.686098742,0.318928781799667,"Spearman's rank correlation rho","two.sided","Platelets","buffa.score",0.42224571838944,NA
+0.00505280446828218,41453.4799546335,0.968649199476611,"Spearman's rank correlation rho","two.sided","Platelets","MitoScore",0.975719631589579,NA
+-0.21607172248743,50666.4122457163,0.0889751244490296,"Spearman's rank correlation rho","two.sided","Preadipocytes","buffa.score",0.163714228986214,NA
+-0.19778374478545,49904.461942741,0.120228142765052,"Spearman's rank correlation rho","two.sided","Preadipocytes","MitoScore",0.199897393994905,NA
+0.207196714755476,33031.3560764278,0.103233509162703,"Spearman's rank correlation rho","two.sided","pro B-cells","buffa.score",0.182952528089061,NA
+0.165664535778807,34761.7527813118,0.194432634333779,"Spearman's rank correlation rho","two.sided","pro B-cells","MitoScore",0.294853885033643,NA
+0.587814401869336,17173.300760516,4.08089518419055e-07,"Spearman's rank correlation rho","two.sided","Sebocytes","buffa.score",6.25737261575885e-06,0.587814401869336
+0.499045927526426,20871.750475539,3.13868212506156e-05,"Spearman's rank correlation rho","two.sided","Sebocytes","MitoScore",0.000240632296254719,0.499045927526426
+-0.281282812140228,53383.3670850105,0.0255354953505031,"Spearman's rank correlation rho","two.sided","Skeletal muscle","buffa.score",0.0618227782170075,NA
+-0.367069154447156,56957.5692508863,0.00308410583984545,"Spearman's rank correlation rho","two.sided","Skeletal muscle","MitoScore",0.0106401651474668,-0.367069154447156
+0.452288724318488,22819.8425899945,0.000198095576440819,"Spearman's rank correlation rho","two.sided","Smooth muscle","buffa.score",0.00118857345864491,0.452288724318488
+0.626543617360034,15559.6867263115,3.95700566503594e-08,"Spearman's rank correlation rho","two.sided","Smooth muscle","MitoScore",7.80095402535656e-07,0.626543617360034
+-0.105864344703912,46074.7320577438,0.408934647379335,"Spearman's rank correlation rho","two.sided","Tgd cells","buffa.score",0.495026152090774,NA
+0.0995402480251589,37516.7551062798,0.437639437242278,"Spearman's rank correlation rho","two.sided","Tgd cells","MitoScore",0.520640020167538,NA
+0.32774325659636,28008.9049571693,0.00873782269087122,"Spearman's rank correlation rho","two.sided","Th1 cells","buffa.score",0.0246765531187954,0.32774325659636
+0.131271910442555,36194.6871233214,0.305117981103991,"Spearman's rank correlation rho","two.sided","Th1 cells","MitoScore",0.416893875171789,NA
+0.574568909115117,17725.1609706278,8.46912097768339e-07,"Spearman's rank correlation rho","two.sided","Th2 cells","buffa.score",1.16873869492031e-05,0.574568909115117
+0.481288560561059,21611.5934127841,6.52134770531564e-05,"Spearman's rank correlation rho","two.sided","Th2 cells","MitoScore",0.000428545706349314,0.481288560561059
+-0.373140470110425,57210.5245466807,0.00259531143831774,"Spearman's rank correlation rho","two.sided","Tregs","buffa.score",0.00967981022940132,-0.373140470110425
+-0.341431372017171,55889.3966837234,0.0061704838842243,"Spearman's rank correlation rho","two.sided","Tregs","MitoScore",0.019352881273249,-0.341431372017171
+-0.279311178044394,53301.2209220416,0.0266303541486817,"Spearman's rank correlation rho","two.sided","ImmuneScore","buffa.score",0.0618853132253531,NA
+-0.135416666666667,47306,0.289965825128798,"Spearman's rank correlation rho","two.sided","ImmuneScore","MitoScore",0.408319223140552,NA
+-0.430877632741058,59616.0856905234,0.000423131247733376,"Spearman's rank correlation rho","two.sided","StromaScore","buffa.score",0.0020854325781145,-0.430877632741058
+-0.316499448302858,54850.6330140903,0.0114988305974387,"Spearman's rank correlation rho","two.sided","StromaScore","MitoScore",0.0311144827930695,-0.316499448302858
+-0.378732313744922,57443.5031198684,0.00220751055453218,"Spearman's rank correlation rho","two.sided","MicroenvironmentScore","buffa.score",0.00846212379237337,-0.378732313744922
+-0.180011520737327,49164,0.15802433765075,"Spearman's rank correlation rho","two.sided","MicroenvironmentScore","MitoScore",0.251960502965884,NA
+1,0,0,"Spearman's rank correlation rho","two.sided","buffa.score","buffa.score",0,1
+0.637529925737552,15101.9531740706,1.9231355678809e-08,"Spearman's rank correlation rho","two.sided","buffa.score","MitoScore",5.30785416735128e-07,0.637529925737552
+0.637529925737552,15101.9531740706,1.9231355678809e-08,"Spearman's rank correlation rho","two.sided","MitoScore","buffa.score",5.30785416735128e-07,0.637529925737552
+1,0,0,"Spearman's rank correlation rho","two.sided","MitoScore","MitoScore",0,1
