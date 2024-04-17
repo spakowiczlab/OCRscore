@@ -26,8 +26,6 @@ ADY" = "Analysis Relative Day"
 expr <- read.csv("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.lcpm_batch_effect_norm.shareWithOSU.csv") %>%
   rename("Gene" = X) 
 
-immune <- read.csv("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.cell_type_enrichment.xCell.shareWithOSU.csv")
-
 clin <- read.csv("/fs/ess/PAS1859/qinma/Genentech/Clinical.2024/clinical_ATE_biom_2024-04-18_masked_OSU.csv") %>%
   # remove unnecessary PHI
   select("USUBJID2", "EVNTDESC", "ADY", "PARAMCD")
@@ -57,8 +55,17 @@ buffa <- calculateBuffa(expr.bl, buffa.genes = inputGenes("Buffa"))
 mit <- calculateMitoscore(expr.bl, mito.genes = inputGenes("Mitoscore"))
 
 # post trt
-buffa.sx <- calculateBuffa(expr.sx, buffa.genes = inputGenes("Buffa"))
-mit.sx <- calculateMitoscore(expr.sx, mito.genes = inputGenes("Mitoscore"))
+# buffa.sx <- calculateBuffa(expr.sx, buffa.genes = inputGenes("Buffa"))
+# mit.sx <- calculateMitoscore(expr.sx, mito.genes = inputGenes("Mitoscore"))
+```
+
+calculate tertiles
+```{r}
+buffa.tert <- quantile(buffa$buffa.score, c(0:3/3))
+mito.tert <- quantile(mit$MitoScore, c(0:3/3))
+
+buffa$tert <- with(buffa, cut(buffa.score, buffa.tert, include.lowest = T, labels = c("Low Buffa", "Medium Buffa", "High Buffa")))
+mit$tert <- with(mit, cut(MitoScore, mito.tert, include.lowest = T, labels = c("Low Mitoscore", "Medium Mitoscore", "High Mitoscore")))
 ```
 
 combine and prep data 
@@ -67,29 +74,36 @@ combine and prep data
 clin <- clin %>%
   rename("sample" = USUBJID2) %>%
   mutate("months" = round(ADY/30.417, digit=0),
-         "status" = ifelse(EVNTDESC == "Death", 1, 0)) %>%
-  filter(PARAMCD == "OS")
+         "status" = ifelse(EVNTDESC %in% c("Death", "Disease Recurrence","Disease Progression"), 1, 0)) %>%
+# can use DFS or OS, specify here  
+  filter(PARAMCD == "DFS")
 
 surv.in.buffa <- clin %>%
   left_join(buffa) %>%
   filter(!is.na(buffa.score)) %>%
   mutate(buffa.hi = ifelse(buffa.score > median(buffa.score), "High Buffa", "Low Buffa"))
 
+buffa.t <- surv.in.buffa %>%
+  filter(tert != "Medium Buffa")
+
 surv.in.mito <- clin %>%
   left_join(mit) %>%
   filter(!is.na(MitoScore)) %>%
-  mutate(mito.hi = ifelse(MitoScore > median(MitoScore), "High Mitoscore", "Low Mitoscore"))
+  mutate(mito.hi = ifelse(MitoScore > median(MitoScore), "High Mitoscore", "Low Mitoscore")) 
 
-surv.in.buffa.sx <- clin %>%
-  left_join(buffa.sx) %>%
-  filter(!is.na(buffa.score)) %>%
-  mutate(buffa.hi = ifelse(buffa.score > median(buffa.score), "High Buffa", "Low Buffa"))
+mito.t <- surv.in.mito %>%
+  filter(tert != "Medium Mitoscore")
 
-# post trt
-surv.in.mito.sx <- clin %>%
-  left_join(mit.sx) %>%
-  filter(!is.na(MitoScore)) %>%
-  mutate(mito.hi = ifelse(MitoScore > median(MitoScore), "High Mitoscore", "Low Mitoscore"))
+# surv.in.buffa.sx <- clin %>%
+#   left_join(buffa.sx) %>%
+#   filter(!is.na(buffa.score)) %>%
+#   mutate(buffa.hi = ifelse(buffa.score > median(buffa.score), "High Buffa", "Low Buffa"))
+# 
+# # post trt
+# surv.in.mito.sx <- clin %>%
+#   left_join(mit.sx) %>%
+#   filter(!is.na(MitoScore)) %>%
+#   mutate(mito.hi = ifelse(MitoScore > median(MitoScore), "High Mitoscore", "Low Mitoscore"))
 ```
 
 ## survival analysis
@@ -105,6 +119,7 @@ surv.b %>%
 
 ggsave("../figures/km-curve_LCMC3_buffa.png", height = 5, width = 4)
 ```
+
 basline, mitoscore
 ```{r}
 surv.m <- ggsurvfit::survfit2(Surv(months, status) ~ mito.hi, data = surv.in.mito)
@@ -116,26 +131,44 @@ surv.m %>%
 
 ggsave("../figures/km-curve_LCMC3_mito.png", height = 5, width = 4)
 ```
-
-
-post trt, buffa
+baseline, tertile, buffa
 ```{r}
-surv.b.sx <- ggsurvfit::survfit2(Surv(months, status) ~ buffa.hi, data = surv.in.buffa.sx)
+surv.b.t <- ggsurvfit::survfit2(Surv(months, status) ~ tert, data = buffa.t)
 
-surv.b.sx %>%
+surv.b.t %>%
   ggsurvfit() +
-  add_pvalue()
+  add_pvalue() +
+  add_risktable()
+
+ggsave("../figures/km-curve_LCMC3_buffa-tertile.png", height = 5, width = 4)
 ```
 
-
-post trt, mitoscore
+baseline, tertile, mitoscore
 ```{r}
-surv.m.sx <- ggsurvfit::survfit2(Surv(months, status) ~ mito.hi, data = surv.in.mito.sx)
+surv.m.t <- ggsurvfit::survfit2(Surv(months, status) ~ tert, data = mito.t)
 
-surv.m.sx %>%
+surv.m.t %>%
   ggsurvfit() +
-  add_pvalue()
+  add_pvalue() +
+  add_risktable()
+
+ggsave("../figures/km-curve_LCMC3_mito-tertile.png", height = 5, width = 4)
 ```
 
+<!-- post trt, buffa -->
+<!-- ```{r} -->
+<!-- surv.b.sx <- ggsurvfit::survfit2(Surv(months, status) ~ buffa.hi, data = surv.in.buffa.sx) -->
 
+<!-- surv.b.sx %>% -->
+<!--   ggsurvfit() + -->
+<!--   add_pvalue() -->
+<!-- ``` -->
 
+<!-- post trt, mitoscore -->
+<!-- ```{r} -->
+<!-- surv.m.sx <- ggsurvfit::survfit2(Surv(months, status) ~ mito.hi, data = surv.in.mito.sx) -->
+
+<!-- surv.m.sx %>% -->
+<!--   ggsurvfit() + -->
+<!--   add_pvalue() -->
+<!-- ``` -->
