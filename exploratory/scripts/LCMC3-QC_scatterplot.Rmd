@@ -1,0 +1,81 @@
+---
+title: "scatterplot"
+author: "Caroline Wheeler"
+date: "5/20/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(tmesig)
+
+# package to read in SAS files
+library(haven)
+```
+
+```{r}
+expr <- read.csv("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.lcpm_batch_effect_norm.shareWithOSU.csv") %>%
+  rename("Gene" = X) 
+
+immune <- read.csv("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.cell_type_enrichment.xCell.shareWithOSU.csv")
+
+hist <- haven::read_sas("/fs/ess/PAS1859/qinma/Genentech/patient.meta.2021/adsl_biom_mask.sas7bdat")
+```
+
+baseline v. post trt
+```{r}
+expr.sx <- expr %>% select(Gene, contains("Sx"))
+expr.bl <- expr %>% select(Gene, contains("Bl"))
+```
+
+calculate scores
+```{r}
+# baseline
+buffa.bl <- calculateBuffa(expr.bl, buffa.genes = inputGenes("Buffa")) 
+mit.bl <- calculateMitoscore(expr.bl, mito.genes = inputGenes("Mitoscore")) 
+  
+# post trt
+buffa.sx <- calculateBuffa(expr.sx, buffa.genes = inputGenes("Buffa")) 
+mit.sx <- calculateMitoscore(expr.sx, mito.genes = inputGenes("Mitoscore"))
+```
+
+clean up histology
+```{r}
+hist <- hist %>%
+  select(USUBJID, MH_HISTOL) %>%
+  rename("sample" = USUBJID,
+         "histology" = MH_HISTOL)
+```
+
+combine
+```{r}
+bl <- buffa.bl %>%
+  left_join(mit.bl) %>%
+  mutate(sample = gsub("_", "-", substr(sample, 4, nchar(sample))),
+         timepoint = "BASELINE") %>%
+  left_join(hist) 
+
+sx <- buffa.sx %>%
+  left_join(mit.sx) %>%
+  mutate(sample = gsub("_", "-", substr(sample, 4, nchar(sample))),
+         timepoint = "POST") %>%
+  left_join(hist)
+
+bl.sx <- rbind(bl, sx)
+```
+
+plot
+```{r}
+bl.sx %>%
+  ggplot(aes(x = MitoScore, y = buffa.score)) +
+  geom_point() +
+  theme_bw() +
+  facet_grid(timepoint~histology) +
+  geom_smooth(method = "lm")
+
+ggsave("../figures/scatterplot_LCMC3.png", width = 4, height = 4)
+```
+
