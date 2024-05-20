@@ -16,6 +16,11 @@ library(survival)
 library(ggsurvfit)
 ```
 
+```{r input files used}
+md5sum(c("/fs/ess/PAS1859/qinma/Genentech/RNA.2023/LCMC3.bulkRNA.lcpm_batch_effect_norm.shareWithOSU.csv",
+       "/fs/ess/PAS1859/qinma/Genentech/Clinical.2024/clinical_ATE_biom_2024-04-18_masked_OSU.csv"))
+```
+
 read in data 
 
 Notes: unsure about clincial variables used...
