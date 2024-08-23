@@ -1,0 +1,47 @@
+---
+title: "distribution differences"
+author: "Caroline Wheeler"
+date: "8/21/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+library(stats)
+```
+
+read in binned data
+```{r}
+x <- readxl::read_xlsx("../data/histogram pimo B5 parent OE.xlsx") %>%
+  rename("Bin" = "...1")
+
+y <- x %>%
+  pivot_longer(!Bin, names_to = "Group", values_to = "Intensity")
+```
+
+Remake the plot
+```{r}
+y %>%
+  ggplot(aes(x = Bin, y = Intensity, color = Group)) +
+  geom_point() + 
+  geom_line() + 
+  theme_bw()
+```
+
+Kolmogorov-Smirnov test ??
+```{r}
+# Do x and y come from the same distribution?
+stats::ks.test(x$Parent, x$OE)
+```
+
+<!-- pairwise chi-square test, followed by adjusting for multiple comparisons, -->
+<!-- ```{r} -->
+<!-- stats::chisq.test(x$Parent, x$OE) -->
+<!-- rcompanion::pairwiseNominalIndependence(x$Parenmt) -->
+<!-- ``` -->
+
+
