@@ -1,0 +1,93 @@
+---
+title: "buffa-mitoscore scatter"
+author: "Caroline Dravillas"
+date: "2024-09-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(broom)
+```
+
+```{r}
+path <- "/Users/wheeler.1017/The Ohio State University Wexner Medical Center - Spakowicz, Daniel - mitoscore/"
+```
+
+read in all OXPHOS datasheets
+```{r}
+mitoscore.files <- data.frame(files = list.files(file.path(path, "data", "many-cancers"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files)) %>%
+  filter(grepl("OXPHOS", files))
+
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+           # cancer = toupper(cancer)) 
+}
+
+mitoscore <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows()
+```
+
+```{r}
+corder <- readRDS("../data/order-cancers-lollipop.RDS")
+
+lm.res <- list()
+for(x in corder){
+  tmp <- mitoscore %>%
+    filter(cancer == x)
+  
+  lm.mod <- lm(AvgExpr ~ BUFFA_HYPOXIA_SCORE, data = tmp)
+  
+  sum.mod <- summary(lm.mod)
+  rsqr <- sum.mod$r.squared
+  pval <- sum.mod$coefficients[8]
+  lm.res[[x]] <- as.data.frame(cbind(R.Squared = rsqr, p.value = pval, cancer = x))
+
+}
+
+lm.res.df <- bind_rows(lm.res) %>%
+  mutate(BUFFA_HYPOXIA_SCORE = 25, AvgExpr = 12,
+         Cancer = toupper(cancer),
+         p.value = as.numeric(p.value),
+         R.Squared.2 = round(as.numeric(R.Squared), 2),
+         Rsq.label = paste0("R<sup>2</sup> = ", R.Squared.2)) %>%
+  filter(cancer != "kirc")
+```
+
+
+```{r}
+mitoscore %>%
+  mutate(Cancer = toupper(cancer),
+         pos = if_else(BUFFA_HYPOXIA_SCORE > 0,
+                      true = "positive",
+                      false = "negative")) %>%
+  filter(Cancer %in% c("BRCA", "LUAD", "COADREAD")) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
+  theme_bw() +
+  stat_smooth(aes(group = 1), method = "lm", color = "red", lwd = 1.5) +
+  geom_richtext(data = lm.res.df,
+             aes(label = Rsq.label,
+                 fill = "black"),
+             color = "white",
+            nudge_y = -0.5
+             ) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Mitoscore") +
+  facet_wrap(vars(Cancer), ncol = 3) +
+  theme(legend.position = "none")
+
+ggsave("../figures/scatterplot_buffa-mito_brca+coad+luad.png", height = 2.5, width = 6)
+```
+
