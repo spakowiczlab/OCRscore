@@ -1,0 +1,61 @@
+---
+title: "calc-mitoscore"
+output: html_document
+date: "2024-12-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tmesig)
+```
+
+## read in data
+```{r}
+oncosg <- read.delim("../data/OncoSG_mrna_v2_rsem_zscores.txt")
+moes <- readxl::read_xlsx("../data/41588_2023_1355_MOESM3_ESM_RNAseq-TPM.xlsx", skip = 2)
+```
+
+## MitoScore genes
+
+```{r}
+mito.genes <- inputGenes("Mitoscore")
+```
+
+
+## Calculate MitoScore - z-score transformed
+
+'OncoSG_mrna_v2_rsem_zscores' already z-score transformed.
+The 'MitoScore' here represents the average Z-score of mito genes for each sample.
+```{r}
+oncosg.m <- oncosg %>%
+  dplyr::select(-Entrez_Gene_Id) %>%
+  dplyr::rename("Gene" = Hugo_Symbol) %>%
+  filter(Gene %in% mito.genes)%>%
+  column_to_rownames("Gene") %>%
+  filter(if_any(everything(), ~ !is.na(.)))
+
+# mean Z-score of mito genes
+mito <- colMeans(oncosg.m)
+
+# Convert to a data frame
+oncosg.mito <- data.frame(AvgZscore = mito) %>%
+  rownames_to_column("sample")
+
+# save
+write.csv(oncosg.mito, "../data/OncoSG_avgZscore.csv", row.names = F)
+```
+
+## Calculate mitoscore - TPM
+```{r}
+moes <- moes %>%
+  dplyr::select(-Name) %>%
+  dplyr::rename("Gene" = Description)
+
+moes.mito <- tmesig::calculateMitoscore(moes, mito.genes = inputGenes("Mitoscore"))
+
+# Save
+write.csv(moes.mito, "../data/MOESM3_mitocore.csv", row.names = F)
+```
+
