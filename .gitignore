@@ -43,3 +43,4 @@ mitoscore.json
 exploratory/scripts/00-paths.R
 00-paths.R
 
+.DS_Store
