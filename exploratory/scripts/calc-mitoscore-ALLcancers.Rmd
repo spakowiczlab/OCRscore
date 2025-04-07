@@ -1,0 +1,59 @@
+---
+title: "mitoscore calc for all cancers"
+output: html_document
+date: "2024-12-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tmesig)
+
+source("00-paths.R")
+```
+
+```{r}
+x <- data.frame(files = list.files(file.path(paths$tdrive, "data", "many-cancers"), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("\\.txt", files)) %>%
+  filter(grepl("MaxLimitsall", files))
+  
+mitoscore.files <- x %>%
+  filter(grepl("OXPHOS", files))
+```
+
+
+```{r}
+readAndFilter <- function(table) {
+  read.table(table) %>%
+    #select(BUFFA_HYPOXIA_SCORE, AvgExpr) %>%
+    rownames_to_column("sampleID") %>%
+    mutate(cancer = table) %>%
+    mutate(cancer = gsub(pattern = ".*LogExpr_(.*)_AverageGene.*", 
+                         replacement = "\\1",
+                         x = cancer))
+           # cancer = toupper(cancer)) 
+}
+```
+
+```{r}
+genes <- lapply(X = mitoscore.files$files, readAndFilter) %>%
+  bind_rows()
+
+cancer <- genes %>% select(sampleID, cancer) 
+genes <- genes %>%
+  dplyr::select(-c("BUFFA_HYPOXIA_SCORE",
+             "WINTER_HYPOXIA_SCORE",
+             "RAGNUM_HYPOXIA_SCORE",
+             "AvgExpr", 
+             "cancer")) %>%
+  pivot_longer(!sampleID, names_to = "Gene", values_to = "counts") 
+```
+
+calc mitoscore
+```{r}
+mitoscore <- tmesig::calculateMitoscore(genes, mito.genes = inputGenes("Mitoscore"))
+```
+
+

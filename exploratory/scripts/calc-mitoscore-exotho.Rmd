@@ -1,0 +1,93 @@
+---
+title: "lung buffa/mitoscore"
+author: "C. Dravillas"
+date: "2025-04-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tmesig)
+library(purrr)
+
+source("00-paths.R")
+```
+
+# Read in Data
+
+```{r}
+# n = 955
+pt.key <- read.delim("../data/tho_lung_cancer.s_clinical_data.tsv") %>%
+  select(Patient.ID, Sample.ID, Sequencing.Type) %>%
+  separate(Sample.ID, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(WES.ID = ifelse(Sequencing.Type == "WES", sample, WES.ID),
+         sample = ifelse(Sequencing.Type == "WES", NA, sample),
+         sample = gsub("-RNA", "", sample)) %>%
+  select(Patient.ID, sample) %>%
+  filter(!is.na(sample))
+
+gene.path <- "TCC00601-BENE/RNAseq/gene_and_transcript_expression_results"
+
+# n = 182 in overlapping sample set 
+gene.files <- data.frame(files = list.files(file.path(paths$tdrive, gene.path), 
+                                   full.names = TRUE)) %>%
+  filter(grepl("genes", files)) %>%
+  filter(!grepl("md5", files)) %>%
+  mutate(sample = sub(".*/([^/]+)\\.genes\\.results$", "\\1", files),
+         sample = sub("-RNA", "", sample)) %>%
+  filter(sample %in% pt.key$sample)
+```
+
+There are 3 different sample formats 
+SL-
+AZSF
+FT- 
+Note: Not all sample present in clinical tsv are present on t-drive 
+
+```{r}
+expr <- gene.files %>%
+  mutate(data = map2(files, sample, ~ read.delim(.x) %>% 
+                        mutate(sample = .y))) %>%
+  pull(data) %>%
+  bind_rows()
+
+head(expr)
+```
+
+expected count, TPM and FPKM available 
+tmesig function uses counts 
+
+need in format @param gene_matrix A data frame of expression counts where rows 
+are genes, columns are samples, and the gene symbols are available in a column 
+defined as "Gene".
+
+Need to handle duplicate counts for SLC25A6, there is a version that is 0 for all,
+will remove that one I guess? 
+
+```{r}
+expr.in  <- expr %>%
+  dplyr::select(sample, gene_symbol, expected_count) %>%
+  dplyr::rename(Gene = gene_symbol) %>%
+  filter(Gene %in% inputGenes("Mitoscore") | Gene %in% inputGenes("Buffa"),
+         !(Gene == "SLC25A6" & expected_count == 0)) %>%
+  pivot_wider(names_from = sample, values_from = expected_count)
+```
+
+Calculate Mitoscore & Buffa
+
+```{r}
+mitoscore <- tmesig::calculateMitoscore(expr.in, mito.genes = inputGenes("Mitoscore"))
+buffa <- tmesig::calculateBuffa(expr.in, buffa.genes = inputGenes("Buffa"))
+```
+
+Combine scores and save
+```{r}
+scores <- merge(mitoscore, buffa)
+
+write.csv(scores, file = "../data/tho_lung_cancer-mitoBuffa.csv", row.names = FALSE)
+```
+
+
+
