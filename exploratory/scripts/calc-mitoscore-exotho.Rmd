@@ -18,6 +18,7 @@ source("00-paths.R")
 # Read in Data
 
 ```{r}
+# initial n=1098 distinct Patient
 # n = 955
 pt.key <- read.delim("../data/tho_lung_cancer.s_clinical_data.tsv") %>%
   select(Patient.ID, Sample.ID, Sequencing.Type) %>%
@@ -67,6 +68,11 @@ Need to handle duplicate counts for SLC25A6, there is a version that is 0 for al
 will remove that one I guess? 
 
 ```{r}
+nduf <- expr %>%
+  filter(gene_symbol == "NDUFB5") %>%
+  mutate(NDUFB5.TPM = TPM) %>%
+  select(sample, NDUFB5.TPM)
+
 expr.in  <- expr %>%
   dplyr::select(sample, gene_symbol, expected_count) %>%
   dplyr::rename(Gene = gene_symbol) %>%
@@ -84,7 +90,8 @@ buffa <- tmesig::calculateBuffa(expr.in, buffa.genes = inputGenes("Buffa"))
 
 Combine scores and save
 ```{r}
-scores <- merge(mitoscore, buffa)
+scores <- merge(mitoscore, buffa) %>%
+  left_join(nduf)
 
 write.csv(scores, file = "../data/tho_lung_cancer-mitoBuffa.csv", row.names = FALSE)
 ```
