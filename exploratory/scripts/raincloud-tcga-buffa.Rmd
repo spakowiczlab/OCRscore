@@ -15,7 +15,7 @@ source("00-paths.R")
 
 # Retrieve file names
 ```{r}
-x <- data.frame(files = list.files( file.path(paths$box, 
+x <- data.frame(files = list.files(file.path(paths$onedrive, 
                                               "data", 
                                               "many-cancers"), 
                                     full.names = TRUE)) %>%
