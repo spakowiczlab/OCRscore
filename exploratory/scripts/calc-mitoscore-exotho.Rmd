@@ -110,5 +110,14 @@ scores <- merge(mitoscore, buffa) %>%
 write.csv(scores, file = "../data/tho_lung_cancer-mitoBuffa.csv", row.names = FALSE)
 ```
 
+```{r}
+scores.TPM <- merge(mitoscore, buffa) %>%
+  left_join(nduf) %>%
+  left_join(TPM.mitoscore) %>%
+  left_join(TPM.buffa)
+
+write.csv(scores.TPM, file = "../data/tho_lung_cancer-mitoBuffa-TPM.csv", row.names = FALSE)
+```
+
 
 
