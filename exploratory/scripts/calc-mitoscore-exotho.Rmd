@@ -18,20 +18,21 @@ source("00-paths.R")
 # Read in Data
 
 ```{r}
-# initial n=1098 distinct Patient
-# n = 955
-pt.key <- read.delim("../data/tho_lung_cancer.s_clinical_data.tsv") %>%
-  select(Patient.ID, Sample.ID, Sequencing.Type) %>%
-  separate(Sample.ID, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
-  mutate(WES.ID = ifelse(Sequencing.Type == "WES", sample, WES.ID),
-         sample = ifelse(Sequencing.Type == "WES", NA, sample),
+# initial n=XXXX distinct Patient
+# n=2453 after filtering 
+pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t", quote = "", col_names = TRUE) %>%
+  select(`Patient ID`, `Sample ID`, `Sequencing Type`) %>%
+  separate(`Sample ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
+         sample = ifelse(`Sequencing Type` == "WES", NA, sample),
          sample = gsub("-RNA", "", sample)) %>%
-  select(Patient.ID, sample) %>%
+  select(`Patient ID`, sample) %>%
   filter(!is.na(sample))
 
 gene.path <- "TCC00601-BENE/RNAseq/gene_and_transcript_expression_results"
 
-# n = 182 in overlapping sample set 
+# n = 403 total gene files 
+# n = 403 in overlapping set
 gene.files <- data.frame(files = list.files(file.path(paths$tdrive, gene.path), 
                                    full.names = TRUE)) %>%
   filter(grepl("genes", files)) %>%
@@ -79,13 +80,26 @@ expr.in  <- expr %>%
   filter(Gene %in% inputGenes("Mitoscore") | Gene %in% inputGenes("Buffa"),
          !(Gene == "SLC25A6" & expected_count == 0)) %>%
   pivot_wider(names_from = sample, values_from = expected_count)
+
+expr.in.TPM <- expr %>%
+  dplyr::select(sample, gene_symbol, TPM) %>%
+  dplyr::rename(Gene = gene_symbol) %>%
+  filter(Gene %in% inputGenes("Mitoscore") | Gene %in% inputGenes("Buffa"),
+         !(Gene == "SLC25A6" & TPM == 0)) %>%
+  pivot_wider(names_from = sample, values_from = TPM)
 ```
 
 Calculate Mitoscore & Buffa
 
 ```{r}
+# w/ expected counts 
 mitoscore <- tmesig::calculateMitoscore(expr.in, mito.genes = inputGenes("Mitoscore"))
 buffa <- tmesig::calculateBuffa(expr.in, buffa.genes = inputGenes("Buffa"))
+# w/ TPM
+TPM.mitoscore <- tmesig::calculateMitoscore(expr.in.TPM, mito.genes = inputGenes("Mitoscore")) %>%
+  rename(MitoScore.TPM = MitoScore)
+TPM.buffa <- tmesig::calculateBuffa(expr.in.TPM, buffa.genes = inputGenes("Buffa")) %>%
+  rename(buffa.score.TPM = buffa.score)
 ```
 
 Combine scores and save
