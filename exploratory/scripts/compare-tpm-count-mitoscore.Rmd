@@ -1,0 +1,65 @@
+---
+title: "compare-tpm-count-mitoscore"
+author: "Dan Spakowicz"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+```{r}
+x <- read_csv("../data/tho_lung_cancer-mitoBuffa-TPM.csv")
+
+head(x)
+```
+
+```{r}
+x |> 
+  ggplot(aes(x = MitoScore, y = MitoScore.TPM)) +
+  geom_point() +
+  stat_smooth(method = "lm") +
+  theme_bw()
+```
+
+```{r}
+lm0 <- lm(MitoScore ~ MitoScore.TPM,
+          data = x)
+
+summary(lm0)
+```
+
+```{r}
+x |> 
+  ggplot(aes(x = buffa.score, y = buffa.score.TPM)) +
+  geom_point() +
+  stat_smooth(method = "lm") +
+  theme_bw()
+```
+
+```{r}
+lm1 <- lm(buffa.score ~ buffa.score.TPM,
+          data = x)
+
+summary(lm1)
+```
+
+```{r}
+lm2 <- lm(MitoScore ~ buffa.score, data = x)
+
+summary(lm2)
+```
+
+```{r}
+lm3 <- lm(MitoScore.TPM ~ buffa.score.TPM, data = x)
+
+summary(lm3)
+```
+
+```{r}
+BIC(lm2)
+BIC(lm3)
+```
