@@ -1,0 +1,96 @@
+---
+title: "mt.surv exotho"
+author: "C. Dravillas"
+date: "2025-04-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(mt.surv)
+```
+
+# Get data (n = 403 samples)
+
+```{r}
+# scores
+scores <- read.csv("../data/tho_lung_cancer-mitoBuffa-TPM.csv")
+
+# clinical info 
+pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t", quote = "", col_names = TRUE) %>%
+  separate(`Sample ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
+         sample = ifelse(`Sequencing Type` == "WES", NA, sample),
+         sample = gsub("-RNA", "", sample)) %>%
+  filter(sample %in% scores$sample) %>%
+  # get vars of interest 
+  select(sample, AgeAtDiagnosis, AgeAtLastContact, PatientVitalStatus, RadiationTherapyInd, ImmunoOncologyDrug) %>%
+  full_join(scores)
+```
+# Create surv var
+
+```{r}
+
+survin <- pt.key %>%
+  mutate(days = NA,
+         vitalstatus = ifelse()) %>%
+   select(sample, days, vitalstatus)
+
+# join with var of interest 
+```
+
+# mt.surv
+
+Note - function requires same order of samples 
+
+```{r}
+res <- mt.surv::survivalByQuantile()
+```
+
+
+
+
+```{r}
+#here is the 'drop the middle' code
+
+test.quants <- seq(0.01, 0.5, by = 0.01)
+
+tmp.out <- data.frame(i = test.quants,
+                      hr = NA,
+                      p.value = NA,
+                      cutoff.value = NA)
+i <- 1
+
+for (i in 1:length(test.quants)) {
+  
+  lower.threshold <- test.quants[i]
+  upper.threshold <- 1 - test.quants[i] 
+  
+  tmp <- 
+    CApos %>% 
+    mutate(new.groups = case_when(CandidaCount < quantile(CandidaCount, probs = lower.threshold) ~ "Low",
+                                  CandidaCount > quantile(CandidaCount, probs = upper.threshold) ~ "High"))
+  
+  tmp.cand <- tmp %>% 
+    select(AvatarKey, CandidaCount)
+  
+  survivaldfshort <- survivaldf %>% 
+    right_join(tmp.cand, by = "AvatarKey") %>% 
+    select(AvatarKey, diagsurvtime, vitalstatus, days)
+    
+  survoutput <-  mt.surv::survivalByQuantile("CandidaCount", tmp.cand, survivaldfshort)
+  #need a left join and a select
+  
+  arranged.survoutput <- survoutput %>% 
+  arrange(pval) 
+  
+  tmp.out$p.value[i] <- arranged.survoutput$pval[1]
+  tmp.out$hr[i] <- arranged.survoutput$hazard.ratio[1]
+  tmp.out$cutoff.value[i] <- arranged.survoutput$cutoff.value[1]
+  
+}
+
+```
+
