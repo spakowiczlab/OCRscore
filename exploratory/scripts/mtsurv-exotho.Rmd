@@ -32,10 +32,9 @@ pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t"
 # Create surv var
 
 ```{r}
-
 survin <- pt.key %>%
-  mutate(days = NA,
-         vitalstatus = ifelse()) %>%
+  mutate(days = (365.25*as.double(AgeAtLastContact))-(365.25*as.double(AgeAtDiagnosis)),
+         vitalstatus = ifelse(PatientVitalStatus == "Dead", 1, 0)) %>%
    select(sample, days, vitalstatus)
 
 # join with var of interest 
