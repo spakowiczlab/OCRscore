@@ -10,7 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(mt.surv)
+library(purrr)
+library(patchwork)
 ```
+
 
 # Get data (n = 403 samples)
 
@@ -29,28 +32,96 @@ pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t"
   select(sample, AgeAtDiagnosis, AgeAtLastContact, PatientVitalStatus, RadiationTherapyInd, ImmunoOncologyDrug) %>%
   full_join(scores)
 ```
-# Create surv var
+# Create surv var and input data 
 
 ```{r}
 survin <- pt.key %>%
-  mutate(days = (365.25*as.double(AgeAtLastContact))-(365.25*as.double(AgeAtDiagnosis)),
-         vitalstatus = ifelse(PatientVitalStatus == "Dead", 1, 0)) %>%
-   select(sample, days, vitalstatus)
+  mutate(days = (365.25*as.numeric(AgeAtLastContact))-(365.25*as.numeric(AgeAtDiagnosis)),
+         vitalstatus = ifelse(PatientVitalStatus == "Dead", 1, 0))
 
-# join with var of interest 
+rad <- filter(survin, RadiationTherapyInd == "Yes")
+io <- filter(survin, ImmunoOncologyDrug == "Yes")
 ```
+
+9 mtsurv curves:
+
+3 scores
+- mitoscore.tpm
+- buffa.tpm
+- ndufb5.tpm
+
+3 cohorts
+- All
+- only those treated with radiation
+- only those treated with IO
 
 # mt.surv
 
 Note - function requires same order of samples 
 
 ```{r}
-res <- mt.surv::survivalByQuantile()
+# ALL
+all.mito <- mt.surv::survivalByQuantile("MitoScore.TPM", survin, survin)
+all.buffa <- mt.surv::survivalByQuantile("buffa.score.TPM", survin, survin)
+all.nduf <- mt.surv::survivalByQuantile("NDUFB5.TPM", survin, survin)
+
+# Radiation
+rad.mito <- mt.surv::survivalByQuantile("MitoScore.TPM", rad, rad)
+rad.buffa <- mt.surv::survivalByQuantile("buffa.score.TPM", rad, rad)
+rad.nduf <- mt.surv::survivalByQuantile("NDUFB5.TPM", rad, rad)
+
+# IO
+io.mito <- mt.surv::survivalByQuantile("MitoScore.TPM", io, io)
+io.buffa <- mt.surv::survivalByQuantile("buffa.score.TPM", io, io)
+io.nduf <- mt.surv::survivalByQuantile("NDUFB5.TPM", io, io)
+```
+
+# Plot
+
+```{r}
+plot_survival <- function(data, group, score) {
+  ggplot(data, aes(x = percentile, y = -log(pval), color = hazard.direction, group = 1)) +
+    geom_path() +
+    geom_hline(yintercept = -log(0.05), linetype = "dashed", color = "gray") +
+    labs(
+      title = paste0("Group: ", toupper(group), " | Score: ", score),
+      x = "Percentile",
+      y = "-log(p-value)"
+    ) +
+    scale_color_manual(values = c("red", "black")) +
+    theme_bw() +
+    theme(plot.title = element_text(size = 10))
+}
+
+surv_results <- list(
+  all.MitoScore = all.mito,
+  all.BuffaScore = all.buffa,
+  all.NDUFB5 = all.nduf,
+  rad.MitoScore = rad.mito,
+  rad.BuffaScore = rad.buffa,
+  rad.NDUFB5 = rad.nduf,
+  io.MitoScore = io.mito,
+  io.BuffaScore = io.buffa,
+  io.NDUFB5 = io.nduf
+)
+
+plots <- imap(surv_results, function(result, name) {
+  parts <- strsplit(name, "\\.")[[1]]
+  group <- parts[1]
+  score <- parts[2]
+  plot_survival(result, group, score)
+})
+
+combined_plot <- wrap_plots(plots, ncol = 3)
+
+walk(plots, print)
+print(combined_plot)
+
+ggsave("../figures/mtsurv-exotho.png", combined_plot, height = 7, width = 10)
 ```
 
 
-
-
+should I drop the middle tertile for the NDUFB5 analysis
 ```{r}
 #here is the 'drop the middle' code
 
