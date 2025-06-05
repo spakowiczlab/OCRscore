@@ -1,0 +1,76 @@
+---
+title: "NDUFB5 CNA Survival curve for diploid vs amplified samples"
+author: "C. Dravillas"
+date: "2025-06-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+library(tidyverse)
+library(survival)
+library(survminer)
+```
+
+Read in and clean data
+
+diploid -> cn == 2
+amplified -> cn >2
+
+Should we include WES and RNA? 
+What about multiple samples per patient? 
+```{r}
+orien <- readxl::read_xlsx("../data/Whole ORIEN NDUFB5 Copy-Number Values.xlsx") %>%
+  separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(copy.number = `NDUFB5 Copy Number`) %>%
+  select(sample, copy.number)
+
+tcc <- readxl::read_xlsx("../data/TCC00601-BENE_NDUFB5_copy-number 06022025.xlsx") %>%
+  mutate(sample = slid_released,
+         copy.number = as.integer(NDUFB5)) %>%
+  select(sample, copy.number)
+
+samples <- rbind(orien, tcc) %>%
+  mutate(group = ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number >2, "Amplified", NA)))
+
+# n=2453 after filtering 
+pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t", quote = "", col_names = TRUE) 
+
+clin.clean <- pt.key %>%
+  separate(`Sample ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  # filter(!is.na(AgeAtDiagnosis)) %>%
+  mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
+         sample = ifelse(`Sequencing Type` == "WES", NA, sample),
+         sample = gsub("-RNA", "", sample),
+         vital.status = case_when(PatientVitalStatus == "Dead" ~ 1,
+                                  PatientVitalStatus == "Alive" ~ 0),
+         AgeAtDeath = ifelse(AgeAtDeath == ">90", 90, AgeAtDeath),
+         AgeAtLastContact = ifelse(AgeAtLastContact == ">90", 90, AgeAtLastContact),
+         survival.time = case_when(PatientVitalStatus == "Dead" ~ as.double(AgeAtDeath) - as.double(AgeAtDiagnosis),
+                                   PatientVitalStatus == "Alive" ~ as.double(AgeAtLastContact) - as.double(AgeAtDiagnosis))) %>%
+  filter(!is.na(sample)) %>%
+  select(sample, vital.status, survival.time) %>%
+  full_join(samples) %>%
+  filter(!is.na(group),
+         !is.na(survival.time))
+```
+
+Plot KM curve
+```{r}
+fit <- survfit(Surv(survival.time, vital.status) ~ group, data = clin.clean)
+
+# Plot KM curve
+ggsurvplot(
+  fit,
+  data = clin.clean,
+  pval = TRUE,             
+  conf.int = TRUE,         
+  risk.table = TRUE,       
+  xlab = "Time (years)",  
+  ylab = "Survival Probability"
+)
+```
+
