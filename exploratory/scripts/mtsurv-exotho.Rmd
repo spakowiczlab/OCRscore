@@ -42,7 +42,48 @@ survin <- pt.key %>%
 rad <- filter(survin, RadiationTherapyInd == "Yes")
 io <- filter(survin, ImmunoOncologyDrug == "Yes")
 ```
+# New function from AL
+```{r}
+survivalByQuantile <- function(input.var, input.tax, surv.dat, percentiles = seq(.01, .99, 0.01)) {
 
+  aa <- function(input.var, input.tax, surv.dat, percent) {
+    surv.dat$input.var <- input.tax[[input.var]]
+    cut <- quantile(surv.dat$input.var, percent)
+
+    surv.dat$tmp <- case_when(surv.dat$input.var < cut ~ 0,
+                              surv.dat$input.var >= cut ~ 1)
+    surv.dat$tmp <- factor(surv.dat$tmp)
+    surv.dat$tmp <- forcats::fct_relevel(surv.dat$tmp, "0")
+
+    surv_model <- survival::coxph(survival::Surv(days, vitalstatus) ~ tmp, surv.dat)
+
+    tidy_out <- broom::tidy(surv_model, exponentiate = TRUE, conf.int = TRUE)
+
+    dat_temp <- tidy_out %>%
+      dplyr::filter(term == "tmp1") %>%  # keep the comparison group (vs. reference "0")
+      dplyr::mutate(
+        percentile = percent,
+        cutoff.value = cut,
+        hazard.direction = ifelse(estimate >= 1, ">=1", "<1")
+      ) %>%
+      dplyr::select(
+        hazard.ratio = estimate,
+        low.bound = conf.low,
+        upper.bound = conf.high,
+        percentile,
+        cutoff.value,
+        pval = p.value,
+        hazard.direction
+      )
+
+    return(dat_temp)
+  }
+
+  # Run over all percentiles
+  results <- purrr::map_dfr(percentiles, ~aa(input.var, input.tax, surv.dat, .x))
+  return(results)
+}
+```
 9 mtsurv curves:
 
 3 scores
@@ -61,19 +102,19 @@ Note - function requires same order of samples
 
 ```{r}
 # ALL
-all.mito <- mt.surv::survivalByQuantile("MitoScore.TPM", survin, survin)
-all.buffa <- mt.surv::survivalByQuantile("buffa.score.TPM", survin, survin)
-all.nduf <- mt.surv::survivalByQuantile("NDUFB5.TPM", survin, survin)
+all.mito <- survivalByQuantile("MitoScore.TPM", survin, survin)
+all.buffa <- survivalByQuantile("buffa.score.TPM", survin, survin)
+all.nduf <- survivalByQuantile("NDUFB5.TPM", survin, survin)
 
 # Radiation
-rad.mito <- mt.surv::survivalByQuantile("MitoScore.TPM", rad, rad)
-rad.buffa <- mt.surv::survivalByQuantile("buffa.score.TPM", rad, rad)
-rad.nduf <- mt.surv::survivalByQuantile("NDUFB5.TPM", rad, rad)
+rad.mito <- survivalByQuantile("MitoScore.TPM", rad, rad)
+rad.buffa <- survivalByQuantile("buffa.score.TPM", rad, rad)
+rad.nduf <- survivalByQuantile("NDUFB5.TPM", rad, rad)
 
 # IO
-io.mito <- mt.surv::survivalByQuantile("MitoScore.TPM", io, io)
-io.buffa <- mt.surv::survivalByQuantile("buffa.score.TPM", io, io)
-io.nduf <- mt.surv::survivalByQuantile("NDUFB5.TPM", io, io)
+io.mito <- survivalByQuantile("MitoScore.TPM", io, io)
+io.buffa <- survivalByQuantile("buffa.score.TPM", io, io)
+io.nduf <- survivalByQuantile("NDUFB5.TPM", io, io)
 ```
 
 # Plot
@@ -117,11 +158,64 @@ combined_plot <- wrap_plots(plots, ncol = 3)
 walk(plots, print)
 print(combined_plot)
 
-ggsave("../figures/mtsurv-exotho.png", combined_plot, height = 7, width = 10)
+ggsave("../figures/mtsurv-exotho-2.png", combined_plot, height = 7, width = 10)
+```
+
+check function 
+
+
+
+
+
+```{r}
+input.var <- "buffa.score.TPM"
+input.tax <- io
+surv.dat <- io
+percent <- 0.99
+
+
+    surv.dat$input.var <- input.tax[[input.var]]
+    cut <- quantile(surv.dat$input.var, percent)
+
+    surv.dat$tmp <- case_when(surv.dat$input.var <= cut ~ 0,
+                              surv.dat$input.var > cut ~ 1)
+    surv.dat$tmp <- factor(surv.dat$tmp)
+    surv.dat$tmp <- forcats::fct_relevel(surv.dat$tmp, "0")
+
+    surv_model <- survival::coxph(survival::Surv(days, vitalstatus) ~ tmp, surv.dat)
+
+    tidy_out <- broom::tidy(surv_model, exponentiate = TRUE, conf.int = TRUE)
+
+    dat_temp <- tidy_out %>%
+      dplyr::filter(term == "tmp1") %>%  # keep the comparison group (vs. reference "0")
+      dplyr::mutate(
+        percentile = percent,
+        cutoff.value = cut,
+        hazard.direction = ifelse(estimate >= 1, ">=1", "<1")
+      ) %>%
+      dplyr::select(
+        hazard.ratio = estimate,
+        low.bound = conf.low,
+        upper.bound = conf.high,
+        percentile,
+        cutoff.value,
+        pval = p.value,
+        hazard.direction
+      )
+
 ```
 
 
+
 should I drop the middle tertile for the NDUFB5 analysis
+```{r}
+quantile(survin$NDUFB5.TPM, probs = c(1/3, 2/3), na.rm = TRUE)
+survin <- survin %>%
+  mutate(NDUFB5.tert = ifelse(NDUFB5.TPM < 42.45, "Low",
+                              ifelse(NDUFB5.TPM >= 68.01, "High", NA)))
+```
+
+
 ```{r}
 #here is the 'drop the middle' code
 
@@ -162,5 +256,9 @@ for (i in 1:length(test.quants)) {
   
 }
 
+surv.dat$tmp <- case_when(surv.dat$input.var <= cut ~ 0,
+                          surv.dat$input.var > cut ~ 1)
+surv.dat$tmp <- case_when(surv.dat$input.var < cut ~ 0,
+                          surv.dat$input.var >= cut ~ 1)
 ```
 
