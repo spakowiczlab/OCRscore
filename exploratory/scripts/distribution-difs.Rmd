@@ -1,0 +1,144 @@
+---
+title: "denko grant"
+author: "Caroline Wheeler"
+date: "10/4/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(stats)
+```
+
+```{r}
+# interested in difference between distributions 
+# row 1 contains mouse names 
+# skip row 2 
+# row 258 is the last row 
+
+# mice <- readxl::read_xlsx("/Users/whee57/Documents/MC38 +- Bacteria 10-1-2024 pim histograms.xlsx", n_max = 1, col_names = FALSE)
+
+bins <- readxl::read_xlsx("/users/PAS1695/whee57/denko-grant/MC38 +- Bacteria 10-1-2024 pim histograms.xlsx", range = "A2:A258")
+
+# 9 CA mice
+ca <- readxl::read_xlsx("/users/PAS1695/whee57/denko-grant/MC38 +- Bacteria 10-1-2024 pim histograms.xlsx", range = "A3:R258", skip = 2, col_names = FALSE) %>%
+  select(everything()[c(FALSE, TRUE)])
+
+# 10 PBS mice
+pbs <- readxl::read_xlsx("/users/PAS1695/whee57/denko-grant/MC38 +- Bacteria 10-1-2024 pim histograms.xlsx", range = "s3:AL258", skip = 2, col_names = FALSE) %>%
+  select(everything()[c(FALSE, TRUE)])
+
+# 7 SC mice 
+sc <- readxl::read_xlsx("/users/PAS1695/whee57/denko-grant/MC38 +- Bacteria 10-1-2024 pim histograms.xlsx", range = "AM3:AZ258", skip = 2, col_names = FALSE) %>%
+  select(everything()[c(FALSE, TRUE)])
+  
+```
+
+```{r}
+ca %>%
+  cbind(bins) %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = mouse, fill = mouse)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("CA")
+  
+pbs %>%
+  cbind(bins) %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = mouse, fill = mouse)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("PBS")
+  
+  
+sc %>%
+  cbind(bins) %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = mouse, fill = mouse)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("SC")
+```
+
+get average for each group+bin
+```{r}
+ca$CAmean <- rowMeans(ca)
+pbs$PBSmean <- rowMeans(pbs)
+sc$SCmean <- rowMeans(sc)
+```
+
+plot with mean distribution
+```{r}
+ca %>%
+  cbind(bins) %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = mouse, fill = mouse)) +
+  geom_line() +
+  scale_color_manual(values = c(rep("gray", 9), "deeppink3")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("CA")
+
+ggsave("ca.png", height = 3, width = 4)
+  
+pbs %>%
+  cbind(bins) %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = mouse, fill = mouse)) +
+  geom_line() +
+  scale_color_manual(values = c(rep("gray", 10), "deeppink3")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("PBS")
+
+ggsave("pbs.png", height = 3, width = 4)
+  
+sc %>%
+  cbind(bins) %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = mouse, fill = mouse)) +
+  geom_line() +
+  scale_color_manual(values = c(rep("gray", 7), "deeppink3")) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  ggtitle("SC")
+
+ggsave("sc.png", height = 3, width = 4)
+```
+
+```{r}
+x <- cbind(bins, ca$CAmean, pbs$PBSmean, sc$SCmean)
+```
+
+Significance test 
+
+... I think KS-test is actually innapropriate for binned data since it assumes continuous...
+```{r}
+stats::ks.test(x$`ca$CAmean`, x$`pbs$PBSmean`)
+stats::ks.test(x$`ca$CAmean`, x$`sc$SCmean`)
+stats::ks.test(x$`pbs$PBSmean`, x$`sc$SCmean`)
+```
+
+visualize 
+
+```{r}
+x %>%
+  pivot_longer(!bin, names_to = "mouse", values_to = "pixel.intensity") %>%
+  mutate(Group = ifelse(grepl("ca", mouse), "CA",
+                        ifelse(grepl("pbs", mouse), "PBS", "SC"))) %>%
+  ggplot(aes(x = bin, y = pixel.intensity, color = Group)) +
+  geom_line() +
+  theme_minimal()
+```
+
