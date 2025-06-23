@@ -89,7 +89,10 @@ tcc <- tcc %>%
 surv.in <- rbind(orien, tcc) %>%
   mutate(group = ifelse(copy.number < 2, "Deletion",
                         ifelse(copy.number == 2, "Diploid",
-                        ifelse(copy.number > 2, "Amplified", NA)))) %>% 
+                        ifelse(copy.number > 2, "Amplified", NA))),
+         group = ifelse(copy.number > 2 & copy.number < 5, "Mild Amplification",
+                        ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number > 4, "High Amplification", NA)))) %>% 
   distinct()
 
 # can filter to primary samples only but this drops 1255 samples 
@@ -107,40 +110,12 @@ surv.in.filt <- surv.in %>%
 
 ##  Plot KM curve 
 ```{r}
-# Function to generate KM plot for any two groups
 km_pairwise_plot <- function(data, group1, group2) {
   subset_data <- data %>% filter(group %in% c(group1, group2))
   fit <- survfit(Surv(survival.time, vital.status) ~ group, data = subset_data)
   
-  ggsurvplot(
-    fit,
-    data = subset_data,
-    pval = TRUE,               # log-rank p-value
-    risk.table = TRUE,
-    legend.title = "Group",
-    title = paste(group1, "vs", group2),
-    palette = "Dark2",
-  )
-}
-
-km_pairwise_plot <- function(data, group1, group2, color_map = NULL) {
-  library(dplyr)
-  library(survival)
-  library(survminer)
-  
-  # Subset to just the two groups
-  subset_data <- data %>% filter(group %in% c(group1, group2))
-  subset_data$group <- droplevels(subset_data$group)
-  
   # Fit survival model
   fit <- survfit(Surv(survival.time, vital.status) ~ group, data = subset_data)
-
-  # Get colors if color map is provided
-  if (!is.null(color_map)) {
-    palette <- unname(color_map[levels(subset_data$group)])
-  } else {
-    palette <- "Dark2"
-  }
 
   # KM plot with axis tweaks
   ggsurvplot(
@@ -150,49 +125,15 @@ km_pairwise_plot <- function(data, group1, group2, color_map = NULL) {
     risk.table = TRUE,
     legend.title = "Group",
     title = paste(group1, "vs", group2),
-    palette = palette,
     xlab = "Years",
-    xlim = c(0, 20)
+    xlim = c(0, 20),
+    palette = "Dark2"
   )
 }
-
-color_map <- c(
-  "Deletion" = "firebrick",
-  "Dilpoid" = "steelblue",
-  "Amplified" = "darkgreen"
-)
 ```
 
 
-# primary only
-# one plot 
-```{r}
-fit <- survfit(Surv(survival.time, vital.status) ~ group, data = surv.in.prim)
-
-# Plot KM curve
-ggsurvplot(
-  fit,
-  data = surv.in.prim,
-  pval = TRUE,             
-  conf.int = TRUE,         
-  risk.table = TRUE,       
-  xlab = "Time (years)",  
-  ylab = "Survival Probability"
-)
-
-pairwise_survdiff(Surv(survival.time, vital.status) ~ group, data = surv.in.prim, p.adjust.method = "BH")
-```
-# 3 plots
-```{r}
-plot1 <- km_pairwise_plot(surv.in.prim, "Amplified", "Diploid")
-plot2 <- km_pairwise_plot(surv.in.prim, "Amplified", "Deletion")
-plot3 <- km_pairwise_plot(surv.in.prim, "Deletion", "Diploid")
-
-grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
-```
-
-
-Plot KM curve - all samples including duplicate samples
+Plot KM curve - one plot
 ```{r}
 fit <- survfit(Surv(survival.time, vital.status) ~ group, data = surv.in.filt)
 
@@ -209,7 +150,6 @@ ggsurvplot(
 
 pairwise_survdiff(Surv(survival.time, vital.status) ~ group, data = surv.in.filt, p.adjust.method = "BH")
 ```
-
 3 plots
 ```{r}
 plot1 <- km_pairwise_plot(surv.in.filt, "Amplified", "Diploid")
@@ -218,4 +158,39 @@ plot3 <- km_pairwise_plot(surv.in, "Deletion", "Diploid")
 
 grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
 ```
+Check Mild amplification
+```{r}
+plot1 <- km_pairwise_plot(surv.in.filt, "Mild Amplification", "Diploid")
+plot2 <- km_pairwise_plot(surv.in.filt, "Mild Amplification", "High Amplification")
+plot3 <- km_pairwise_plot(surv.in, "High Amplification", "Diploid")
 
+grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
+```
+
+
+<!-- # primary only -->
+<!-- # one plot  -->
+<!-- ```{r} -->
+<!-- fit <- survfit(Surv(survival.time, vital.status) ~ group, data = surv.in.prim) -->
+
+<!-- # Plot KM curve -->
+<!-- ggsurvplot( -->
+<!--   fit, -->
+<!--   data = surv.in.prim, -->
+<!--   pval = TRUE,              -->
+<!--   conf.int = TRUE,          -->
+<!--   risk.table = TRUE,        -->
+<!--   xlab = "Time (years)",   -->
+<!--   ylab = "Survival Probability" -->
+<!-- ) -->
+
+<!-- pairwise_survdiff(Surv(survival.time, vital.status) ~ group, data = surv.in.prim, p.adjust.method = "BH") -->
+<!-- ``` -->
+<!-- # 3 plots -->
+<!-- ```{r} -->
+<!-- plot1 <- km_pairwise_plot(surv.in.prim, "Amplified", "Diploid") -->
+<!-- plot2 <- km_pairwise_plot(surv.in.prim, "Amplified", "Deletion") -->
+<!-- plot3 <- km_pairwise_plot(surv.in.prim, "Deletion", "Diploid") -->
+
+<!-- grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3) -->
+<!-- ``` -->
