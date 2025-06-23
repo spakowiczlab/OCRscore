@@ -71,6 +71,8 @@ clin.clean <- pt.key %>%
          AgeAtLastContact = ifelse(AgeAtLastContact == ">90", 90, AgeAtLastContact),
          survival.time = case_when(PatientVitalStatus == "Dead" ~ as.double(AgeAtDeath) - as.double(AgeAtDiagnosis),
                                    PatientVitalStatus == "Alive" ~ as.double(AgeAtLastContact) - as.double(AgeAtDiagnosis))) %>%
+  # add filter to IO
+  filter(ImmunoOncologyDrug == "Yes") %>%
   select(`Patient ID`, `Sample ID`, sample, WES.ID, vital.status, survival.time, `Sequencing Type`) 
 
 orien <- orien %>%
@@ -127,7 +129,7 @@ km_pairwise_plot <- function(data, group1, group2) {
     title = paste(group1, "vs", group2),
     xlab = "Years",
     xlim = c(0, 20),
-    palette = "Dark2"
+    palette = "lancet"
   )
 }
 ```
