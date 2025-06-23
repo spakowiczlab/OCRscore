@@ -12,6 +12,7 @@ library(readxl)
 library(tidyverse)
 library(survival)
 library(survminer)
+library(gridExtra)
 ```
 
 groups:
@@ -21,16 +22,21 @@ amplified -> cn >2
 
 Should we include WES and RNA? 
 - filter to WES
+- well one of the DF's they gave us is only RNAseq and the other has both sample types but only one CN value for both RNAseq and WES?
+- Going to use RNAseq ? Since thats what the tcc df is? 
 What about multiple samples per patient? 
 - filter to primary tumors 1 sample per person
-- this info not available here........
+- Don't have this info for all samples
+- also this would drop the total to 400 ?
+- Maybe I'll do both? 
 
 # Read in copy number and pt key
 ```{r}
 orien <- readxl::read_xlsx("../data/Whole ORIEN NDUFB5 Copy-Number Values.xlsx") %>%
-  separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(`Sample ID` = SAMPLE_ID) %>%
+  #separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
   mutate(copy.number = `NDUFB5 Copy Number`) %>%
-  select(sample, copy.number)
+  select(ORIENAvatarKey, `Sample ID`, copy.number)
 
 tcc <- readxl::read_xlsx("../data/TCC00601-BENE_NDUFB5_copy-number 06022025.xlsx") %>%
   mutate(sample = slid_released,
@@ -38,81 +44,178 @@ tcc <- readxl::read_xlsx("../data/TCC00601-BENE_NDUFB5_copy-number 06022025.xlsx
   select(sample, copy.number)
 
 pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t", quote = "", col_names = TRUE) 
+
+type <- read.csv("/fs/ess/PAS1695/projects/exorien/data/clinical/20PRJ060OSU_20210712_ClinicalMolLinkage_V4.csv")
 ```
 
 Clean and prepare data
 
-1547 samples with cn available
-1444 that are also in clinical data
-
-of those 
-
-
 ```{r}
-# define groups
-samples <- rbind(orien, tcc) %>%
-  mutate(group = ifelse(copy.number < 2, "Deletion",
-                        ifelse(copy.number == 2, "Diploid",
-                        ifelse(copy.number >2, "Amplified", NA))))
+prim.samps <- type %>%
+  filter(Disease.Type == "THO - Lung Cancer",
+         Primary.Met == "Primary") %>%
+  mutate(sample = RNASeq) %>%
+  select(sample)
 
-# If we filter to just WES we drop down to 228 samples...
 # Unclear if the sample naming is correct 
 clin.clean <- pt.key %>%
-  separate(`Sample ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(SAMPLE_ID = `Sample ID`) %>%
+  separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
   # filter to WES only 
-  filter(`Sequencing Type` == "WES" | `Sequencing Type` == "WES, RNASEQ") %>%
+  # filter(`Sequencing Type` == "WES" | `Sequencing Type` == "WES, RNASEQ") %>%
   mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
+         sample = ifelse(`Sequencing Type` == "WES", NA, sample),
          vital.status = case_when(PatientVitalStatus == "Dead" ~ 1,
                                   PatientVitalStatus == "Alive" ~ 0),
          AgeAtDeath = ifelse(AgeAtDeath == ">90", 90, AgeAtDeath),
          AgeAtLastContact = ifelse(AgeAtLastContact == ">90", 90, AgeAtLastContact),
          survival.time = case_when(PatientVitalStatus == "Dead" ~ as.double(AgeAtDeath) - as.double(AgeAtDiagnosis),
                                    PatientVitalStatus == "Alive" ~ as.double(AgeAtLastContact) - as.double(AgeAtDiagnosis))) %>%
-  select(`Patient ID`, WES.ID, vital.status, survival.time) %>%
-  rename(sample = WES.ID) %>%
-  full_join(samples) %>%
-  filter(!is.na(group),
-         !is.na(survival.time))
+  select(`Patient ID`, `Sample ID`, sample, WES.ID, vital.status, survival.time, `Sequencing Type`) 
 
+orien <- orien %>%
+  left_join(clin.clean) %>%
+  filter(!is.na(copy.number),
+         !is.na(vital.status)) %>%
+  select(`Patient ID`, `Sample ID`, sample, WES.ID, `Sequencing Type`, copy.number, vital.status, survival.time)
 
-# 7 have multiple samples 
-samps.per.pt <- as.data.frame(table(clin.clean$`Patient ID`)) %>%
+tcc <- tcc %>%
+  left_join(clin.clean) %>%
+  filter(!is.na(copy.number),
+         !is.na(vital.status)) %>%
+  select(`Patient ID`, `Sample ID`, sample, WES.ID, `Sequencing Type`, copy.number, vital.status, survival.time)
+
+# combine and get rid of duplicate rows
+surv.in <- rbind(orien, tcc) %>%
+  mutate(group = ifelse(copy.number < 2, "Deletion",
+                        ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number > 2, "Amplified", NA)))) %>% 
+  distinct()
+
+# can filter to primary samples only but this drops 1255 samples 
+surv.in.prim <- surv.in %>% filter(sample %in% prim.samps$sample)
+
+# check duplicate samples n=342
+check <- as.data.frame(table(surv.in$`Patient ID`)) %>%
   filter(Freq > 1)
 
-
-# clin.clean <- pt.key %>%
-#   separate(`Sample ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
-#   # filter(!is.na(AgeAtDiagnosis)) %>%
-#   mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
-#          sample = ifelse(`Sequencing Type` == "WES", NA, sample),
-#          vital.status = case_when(PatientVitalStatus == "Dead" ~ 1,
-#                                   PatientVitalStatus == "Alive" ~ 0),
-#          AgeAtDeath = ifelse(AgeAtDeath == ">90", 90, AgeAtDeath),
-#          AgeAtLastContact = ifelse(AgeAtLastContact == ">90", 90, AgeAtLastContact),
-#          survival.time = case_when(PatientVitalStatus == "Dead" ~ as.double(AgeAtDeath) - as.double(AgeAtDiagnosis),
-#                                    PatientVitalStatus == "Alive" ~ as.double(AgeAtLastContact) - as.double(AgeAtDiagnosis))) %>%
-#   filter(!is.na(sample)) %>%
-#   select(sample, vital.status, survival.time) %>%
-#   full_join(samples) %>%
-#   filter(!is.na(group),
-#          !is.na(survival.time))
-  
+# remove dups
+surv.in.filt <- surv.in %>%
+  filter(!`Patient ID` %in% check$Var1)
 ```
 
 
-Plot KM curve
+##  Plot KM curve 
 ```{r}
-fit <- survfit(Surv(survival.time, vital.status) ~ group, data = clin.clean)
+# Function to generate KM plot for any two groups
+km_pairwise_plot <- function(data, group1, group2) {
+  subset_data <- data %>% filter(group %in% c(group1, group2))
+  fit <- survfit(Surv(survival.time, vital.status) ~ group, data = subset_data)
+  
+  ggsurvplot(
+    fit,
+    data = subset_data,
+    pval = TRUE,               # log-rank p-value
+    risk.table = TRUE,
+    legend.title = "Group",
+    title = paste(group1, "vs", group2),
+    palette = "Dark2",
+  )
+}
+
+km_pairwise_plot <- function(data, group1, group2, color_map = NULL) {
+  library(dplyr)
+  library(survival)
+  library(survminer)
+  
+  # Subset to just the two groups
+  subset_data <- data %>% filter(group %in% c(group1, group2))
+  subset_data$group <- droplevels(subset_data$group)
+  
+  # Fit survival model
+  fit <- survfit(Surv(survival.time, vital.status) ~ group, data = subset_data)
+
+  # Get colors if color map is provided
+  if (!is.null(color_map)) {
+    palette <- unname(color_map[levels(subset_data$group)])
+  } else {
+    palette <- "Dark2"
+  }
+
+  # KM plot with axis tweaks
+  ggsurvplot(
+    fit,
+    data = subset_data,
+    pval = TRUE,
+    risk.table = TRUE,
+    legend.title = "Group",
+    title = paste(group1, "vs", group2),
+    palette = palette,
+    xlab = "Years",
+    xlim = c(0, 20)
+  )
+}
+
+color_map <- c(
+  "Deletion" = "firebrick",
+  "Dilpoid" = "steelblue",
+  "Amplified" = "darkgreen"
+)
+```
+
+
+# primary only
+# one plot 
+```{r}
+fit <- survfit(Surv(survival.time, vital.status) ~ group, data = surv.in.prim)
 
 # Plot KM curve
 ggsurvplot(
   fit,
-  data = clin.clean,
+  data = surv.in.prim,
   pval = TRUE,             
   conf.int = TRUE,         
   risk.table = TRUE,       
   xlab = "Time (years)",  
   ylab = "Survival Probability"
 )
+
+pairwise_survdiff(Surv(survival.time, vital.status) ~ group, data = surv.in.prim, p.adjust.method = "BH")
+```
+# 3 plots
+```{r}
+plot1 <- km_pairwise_plot(surv.in.prim, "Amplified", "Diploid")
+plot2 <- km_pairwise_plot(surv.in.prim, "Amplified", "Deletion")
+plot3 <- km_pairwise_plot(surv.in.prim, "Deletion", "Diploid")
+
+grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
+```
+
+
+Plot KM curve - all samples including duplicate samples
+```{r}
+fit <- survfit(Surv(survival.time, vital.status) ~ group, data = surv.in.filt)
+
+# Plot KM curve
+ggsurvplot(
+  fit,
+  data = surv.in,
+  pval = TRUE,             
+  conf.int = TRUE,         
+  risk.table = TRUE,       
+  xlab = "Time (years)",  
+  ylab = "Survival Probability"
+)
+
+pairwise_survdiff(Surv(survival.time, vital.status) ~ group, data = surv.in.filt, p.adjust.method = "BH")
+```
+
+3 plots
+```{r}
+plot1 <- km_pairwise_plot(surv.in.filt, "Amplified", "Diploid")
+plot2 <- km_pairwise_plot(surv.in.filt, "Amplified", "Deletion")
+plot3 <- km_pairwise_plot(surv.in, "Deletion", "Diploid")
+
+grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
 ```
 
