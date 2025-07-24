@@ -46,6 +46,8 @@ tcc <- readxl::read_xlsx("../data/TCC00601-BENE_NDUFB5_copy-number 06022025.xlsx
 pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t", quote = "", col_names = TRUE) 
 
 type <- read.csv("/fs/ess/PAS1695/projects/exorien/data/clinical/20PRJ060OSU_20210712_ClinicalMolLinkage_V4.csv")
+
+scores <- read.csv("../data/tho_lung_cancer-mitoBuffa-TPM.csv")
 ```
 
 Clean and prepare data
@@ -65,6 +67,7 @@ clin.clean <- pt.key %>%
   # filter(`Sequencing Type` == "WES" | `Sequencing Type` == "WES, RNASEQ") %>%
   mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
          sample = ifelse(`Sequencing Type` == "WES", NA, sample),
+         sample = gsub("-RNA", "", sample),
          vital.status = case_when(PatientVitalStatus == "Dead" ~ 1,
                                   PatientVitalStatus == "Alive" ~ 0),
          AgeAtDeath = ifelse(AgeAtDeath == ">90", 90, AgeAtDeath),
@@ -77,15 +80,17 @@ clin.clean <- pt.key %>%
 
 orien <- orien %>%
   left_join(clin.clean) %>%
+  left_join(scores, by = "sample") %>%
   filter(!is.na(copy.number),
          !is.na(vital.status)) %>%
-  select(`Patient ID`, `Sample ID`, sample, WES.ID, `Sequencing Type`, copy.number, vital.status, survival.time)
+  select(`Patient ID`, `Sample ID`, sample, WES.ID, `Sequencing Type`, copy.number, MitoScore, MitoScore.TPM, buffa.score, buffa.score.TPM, vital.status, survival.time)
 
 tcc <- tcc %>%
   left_join(clin.clean) %>%
+  left_join(scores, by = "sample") %>%
   filter(!is.na(copy.number),
          !is.na(vital.status)) %>%
-  select(`Patient ID`, `Sample ID`, sample, WES.ID, `Sequencing Type`, copy.number, vital.status, survival.time)
+  select(`Patient ID`, `Sample ID`, sample, WES.ID, `Sequencing Type`, copy.number, MitoScore, MitoScore.TPM, buffa.score, buffa.score.TPM, vital.status, survival.time)
 
 # combine and get rid of duplicate rows
 surv.in <- rbind(orien, tcc) %>%
@@ -95,7 +100,12 @@ surv.in <- rbind(orien, tcc) %>%
          group = ifelse(copy.number > 2 & copy.number < 5, "Mild Amplification",
                         ifelse(copy.number == 2, "Diploid",
                         ifelse(copy.number > 4, "High Amplification", NA)))) %>% 
-  distinct()
+  distinct() %>%
+  mutate(mito.group = if_else(MitoScore < median(MitoScore, na.rm=T), 'Low', 
+                           if_else(MitoScore == median(MitoScore, na.rm=T), 'Median', 'High')),
+        buffa.group = if_else(buffa.score < median(buffa.score, na.rm=T), 'Low', 
+                           if_else(buffa.score == median(buffa.score, na.rm=T), 'Median', 'High')))
+
 
 # can filter to primary samples only but this drops 1255 samples 
 surv.in.prim <- surv.in %>% filter(sample %in% prim.samps$sample)
@@ -129,6 +139,7 @@ km_pairwise_plot <- function(data, group1, group2) {
     title = paste(group1, "vs", group2),
     xlab = "Years",
     xlim = c(0, 20),
+    break.time.by = 5,
     palette = "lancet"
   )
 }
@@ -156,7 +167,7 @@ pairwise_survdiff(Surv(survival.time, vital.status) ~ group, data = surv.in.filt
 ```{r}
 plot1 <- km_pairwise_plot(surv.in.filt, "Amplified", "Diploid")
 plot2 <- km_pairwise_plot(surv.in.filt, "Amplified", "Deletion")
-plot3 <- km_pairwise_plot(surv.in, "Deletion", "Diploid")
+plot3 <- km_pairwise_plot(surv.in.filt, "Deletion", "Diploid")
 
 grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
 ```
@@ -164,10 +175,70 @@ Check Mild amplification
 ```{r}
 plot1 <- km_pairwise_plot(surv.in.filt, "Mild Amplification", "Diploid")
 plot2 <- km_pairwise_plot(surv.in.filt, "Mild Amplification", "High Amplification")
-plot3 <- km_pairwise_plot(surv.in, "High Amplification", "Diploid")
+plot3 <- km_pairwise_plot(surv.in.filt, "High Amplification", "Diploid")
 
 grid.arrange(plot1$plot, plot2$plot, plot3$plot, ncol = 3)
 ```
+
+```{r}
+km_pairwise_plot <- function(data, group_col_name) {
+  # Check the column exists
+  if (!group_col_name %in% colnames(data)) {
+    stop("Column not found: ", group_col_name)
+  }
+
+  # Filter to "High" and "Low" only
+  subset_data <- data[data[[group_col_name]] %in% c("High", "Low"), , drop = FALSE]
+
+  # Create a known column name for plotting
+  subset_data$group <- subset_data[[group_col_name]]
+
+  # Fit KM model
+  fit <- survfit(Surv(survival.time, vital.status) ~ group, data = subset_data)
+
+  # Plot
+  ggsurvplot(
+    fit,
+    data = subset_data,
+    pval = TRUE,
+    risk.table = TRUE,
+    legend.title = "Group",
+    title = "High vs Low Buffa Score",
+    xlab = "TimYears",
+    xlim = c(0, 20),
+    break.time.by = 5,
+    palette = "lancet"
+  )
+}
+```
+
+Check Mito Score
+```{r}
+g <- km_pairwise_plot(surv.in.filt, "mito.group")
+print(g)
+combined_plot <- cowplot::plot_grid(
+  g$plot,
+  g$table,
+  ncol = 1,
+  rel_heights = c(3, 1)  # adjust to make risk table smaller
+)
+ggsave("../figures/km-curve_exotho_mitoscore.png",combined_plot, width = 6, height = 8, dpi = 300)
+```
+
+Check Buffa Score
+```{r}
+g <- km_pairwise_plot(surv.in.filt, "buffa.group")
+print(g)
+combined_plot <- cowplot::plot_grid(
+  g$plot,
+  g$table,
+  ncol = 1,
+  rel_heights = c(3, 1)  # adjust to make risk table smaller
+)
+ggsave("../figures/km-curve_exotho_buffa.png",combined_plot, width = 6, height = 8, dpi = 300)
+```
+
+
 
 
 <!-- # primary only -->
