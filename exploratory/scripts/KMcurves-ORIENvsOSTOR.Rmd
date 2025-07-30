@@ -1,0 +1,212 @@
+---
+title: "CNA vs. Buffa vs. Mitoscore"
+author: "Caroline Dravillas"
+date: "2025-07-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tmesig)
+library(survival)
+library(survminer)
+library(gridExtra)
+```
+
+12 KM curves 
+
+TCC OSTOR
+  Filter to IO only 
+    - KM NDUFB5 CNA (2 v >2)
+    - KM Mitoscore (median)
+    - KM Buffa (median)
+  Filter to XRT only 
+    - KM NDUFB5 CNA (2 v >2)
+    - KM Mitoscore (median)
+    - KM Buffa (median)
+    
+ORIEN
+  Filter to IO only 
+    - KM NDUFB5 CNA (2 v >2)
+    - KM Mitoscore (median)
+    - KM Buffa (median)
+  Filter to XRT only 
+    - KM NDUFB5 CNA (2 v >2)
+    - KM Mitoscore (median)
+    - KM Buffa (median)
+
+# Read in expression data and prep
+
+input should be a df of expression counts where rows are genes, columns are samples,
+and the gene symbols are available in a column defined as "Gene".
+
+```{r}
+# raw.expr <- read.csv("")
+```
+
+# Calculate Buffa and Mitoscore with tmesig
+
+```{r}
+# mito <- calculateMitoscore(raw.expr, mito.genes = inputGenes("Mitoscore")) %>%
+#   mutate(sample = gsub(".genes.results", "", sample))
+# buffa <- calculateBuffa(raw.expr, buffa.genes = inputGenes("Buffa")) %>%
+#     mutate(sample = gsub(".genes.results", "", sample))
+```
+
+# Read in existing scores 
+should be replaced with combined scores calculated above
+```{r}
+scores <- read.csv("../data/tho_lung_cancer-mitoBuffa-TPM.csv") %>%
+  # get median splits
+  mutate(mito.grp = ifelse(MitoScore >= median(MitoScore), "High", "Low"),
+         buffa.grp = ifelse(buffa.score >= median(buffa.score), "High", "Low"))
+```
+
+# Read in copy number data 
+includes the samples in the two datasets 
+
+```{r}
+orien.cna <- readxl::read_xlsx("../data/Whole ORIEN NDUFB5 Copy-Number Values.xlsx") %>%
+  mutate(`Sample ID` = SAMPLE_ID) %>%
+  #separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(copy.number = `NDUFB5 Copy Number`) %>%
+  select(ORIENAvatarKey, `Sample ID`, copy.number) 
+
+tcc.cna <- readxl::read_xlsx("../data/TCC00601-BENE_NDUFB5_copy-number 06022025.xlsx") %>%
+  mutate(sample = slid_released,
+         copy.number = as.integer(NDUFB5)) %>%
+  select(sample, copy.number) 
+```
+
+# Read in survival data
+
+```{r}
+pt.key <- read_delim("../data/tho_lung_cancer.s_clinical_data.tsv", delim = "\t", quote = "", col_names = TRUE) 
+
+clin.clean <- pt.key %>%
+  # adjust problem Sample ID 
+  mutate(`Sample ID` = ifelse(`Sample ID` == "9Q7N3QFYKC_FT-SA273713D", 
+                              "9Q7N3QFYKC_FT-SA273713R_FT-SA273713D",
+                              `Sample ID`)) %>%
+  mutate(SAMPLE_ID = `Sample ID`) %>%
+  separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
+  mutate(WES.ID = ifelse(`Sequencing Type` == "WES", sample, WES.ID),
+         sample = ifelse(`Sequencing Type` == "WES", NA, sample),
+         #sample = gsub("-RNA", "", sample),
+         vital.status = case_when(PatientVitalStatus == "Dead" ~ 1,
+                                  PatientVitalStatus == "Alive" ~ 0),
+         AgeAtDeath = ifelse(AgeAtDeath == ">90", 90, AgeAtDeath),
+         AgeAtLastContact = ifelse(AgeAtLastContact == ">90", 90, AgeAtLastContact),
+         survival.time = case_when(PatientVitalStatus == "Dead" ~ as.double(AgeAtDeath) - as.double(AgeAtDiagnosis),
+                                   PatientVitalStatus == "Alive" ~ as.double(AgeAtLastContact) - as.double(AgeAtDiagnosis))) %>%
+  rename(ORIENAvatarKey = `Patient ID`) %>%
+  filter(!is.na(survival.time)) %>%
+  select(ORIENAvatarKey, `Sample ID`, sample, WES.ID, vital.status, survival.time, `Sequencing Type`, ImmunoOncologyDrug, RadiationTherapyInd) 
+```
+
+# Combine and prep data 
+
+```{r}
+# all samples accounted for 
+orien.in <- clin.clean %>% 
+  left_join(orien.cna) %>%
+# include this line if you want to limit it to samples you have CNA for 
+  # filter(!is.na(copy.number)) %>%
+  left_join(scores) %>%
+  mutate(cna.grp = ifelse(copy.number < 2, "Deletion",
+                        ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number > 2, "Amplified", NA))))
+
+# 314 samples should have CNA 
+tcc.in <- clin.clean %>%
+  left_join(tcc.cna) %>%
+# include this line if you want to limit it to samples you have CNA for 
+  # filter(!is.na(copy.number)) %>%
+  left_join(scores) %>%
+  filter(sample %in% tcc.cna$sample) %>%
+  mutate(cna.grp = ifelse(copy.number < 2, "Deletion",
+                        ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number > 2, "Amplified", NA))))
+```
+
+```{r}
+km_pairwise_plot <- function(data, group_col_name, filter_col = NULL, filter_value = NULL) {
+  subset_data <- data
+  subset_data <- subset_data[!is.na(subset_data[[group_col_name]]), ]
+  if (!is.null(filter_col)) subset_data <- subset_data[!is.na(subset_data[[filter_col]]), ]
+  if (!is.null(filter_col) && !is.null(filter_value)) {
+    subset_data <- subset_data[subset_data[[filter_col]] == filter_value, ]
+  }
+
+  subset_data$group <- subset_data[[group_col_name]]
+  
+  fit <- survfit(Surv(survival.time, vital.status) ~ group, data = subset_data)
+  
+  ggsurvplot(
+    fit,
+    data = subset_data,
+    pval = TRUE,
+    risk.table = TRUE,
+    legend.title = "Group",
+    title = paste(group_col_name,
+                  ifelse(!is.null(filter_col), paste("for", filter_col, "== Yes"), "")),
+    xlab = "Time",
+    xlim = c(0, 20),
+    break.time.by = 5,
+    palette = "lancet"
+  )
+}
+
+generate_and_plot_km_curves <- function(data, df_name, group_vars, filter_vars) {
+  plots <- list()
+  
+  for (group_var in group_vars) {
+    for (filter_var in filter_vars) {
+      plot_name <- paste(df_name, group_var, filter_var, sep = "_")
+      p <- km_pairwise_plot(data, group_var, filter_var, "Yes")
+      if (!is.null(p)) {
+        plots[[plot_name]] <- p
+        cat("Plotting:", plot_name, "\n")
+        print(p)
+      } else {
+        message("Skipping plot ", plot_name, " due to no data.")
+      }
+    }
+  }
+  
+  return(plots)
+}
+
+group_vars <- c("cna.grp", "buffa.grp", "mito.grp")
+filter_vars <- c("ImmunoOncologyDrug", "RadiationTherapyInd")
+
+# Run for orien.in
+orien_plots <- generate_and_plot_km_curves(orien.in, "orien", group_vars, filter_vars)
+
+# Run for tcc.in
+tcc_plots <- generate_and_plot_km_curves(tcc.in, "tcc", group_vars, filter_vars)
+```
+
+
+```{r}
+# Extract the main ggplot objects from your ggsurvplot list
+plot_list <- lapply(orien_plots, function(x) x$plot)
+
+# Arrange plots in a grid, e.g., 3 columns
+grid.arrange(grobs = plot_list, ncol = 3)
+
+# Extract the main ggplot objects from your ggsurvplot list
+plot_list <- lapply(tcc_plots, function(x) x$plot)
+
+# Arrange plots in a grid, e.g., 3 columns
+grid.arrange(grobs = plot_list, ncol = 3)
+```
+
+
+
+
+
+ 
+
