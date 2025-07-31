@@ -13,6 +13,8 @@ library(tmesig)
 library(survival)
 library(survminer)
 library(gridExtra)
+library(biomaRt)  
+library(cowplot)
 ```
 
 12 KM curves 
@@ -43,25 +45,59 @@ input should be a df of expression counts where rows are genes, columns are samp
 and the gene symbols are available in a column defined as "Gene".
 
 ```{r}
-# raw.expr <- read.csv("")
+# path <- "/fs/ess/PAS1695/projects/exotho/data/All_Cancer_Gene_expression/"
+# files <- list.files(path, pattern = "\\.genes\\.results$", full.names = TRUE)
+# 
+# combined_df <- map_dfr(files, ~ {
+#   df <- read_delim(.x)      # auto-detects header
+#   df$sample <- sub("\\.genes\\.results$", "", basename(.x)) # remove suffix
+#   df
+# })
+# 
+# raw.expr <- combined_df %>%
+#   rename(sample = file_name) %>%
+#   select(sample, ) %>%
+#   pivot_wider(names_from = sample, values_from = TPM)
+
+raw.expr <- read.delim("/fs/ess/PAS1695/projects/exotho/data/microbiomeRIG/THO_counts.txt")
+
+raw.expr <- raw.expr %>%
+  mutate(gene_id = sub("\\..*", "", gene_id))
+
+mart <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
+unique_ids <- unique(raw.expr$gene_id)
+
+# Map to gene symbols
+gene_map <- getBM(
+  attributes = c("ensembl_gene_id", "hgnc_symbol"),
+  filters = "ensembl_gene_id",
+  values = unique_ids,
+  mart = mart
+)
+
+raw.expr <- raw.expr %>%
+  left_join(gene_map, by = c("gene_id" = "ensembl_gene_id"))
+
+raw.expr <- raw.expr %>%
+  rename("Gene" = hgnc_symbol) %>%
+  dplyr::select(-gene_id)
 ```
 
 # Calculate Buffa and Mitoscore with tmesig
 
 ```{r}
-# mito <- calculateMitoscore(raw.expr, mito.genes = inputGenes("Mitoscore")) %>%
-#   mutate(sample = gsub(".genes.results", "", sample))
-# buffa <- calculateBuffa(raw.expr, buffa.genes = inputGenes("Buffa")) %>%
-#     mutate(sample = gsub(".genes.results", "", sample))
+mito <- calculateMitoscore(raw.expr, mito.genes = inputGenes("Mitoscore")) %>%
+  mutate(sample = gsub(".genes.results", "", sample))
+buffa <- calculateBuffa(raw.expr, buffa.genes = inputGenes("Buffa")) %>%
+    mutate(sample = gsub(".genes.results", "", sample))
+
+scores <- mito %>% full_join(buffa)
 ```
 
 # Read in existing scores 
 should be replaced with combined scores calculated above
 ```{r}
-scores <- read.csv("../data/tho_lung_cancer-mitoBuffa-TPM.csv") %>%
-  # get median splits
-  mutate(mito.grp = ifelse(MitoScore >= median(MitoScore), "High", "Low"),
-         buffa.grp = ifelse(buffa.score >= median(buffa.score), "High", "Low"))
+# scores <- read.csv("../data/tho_lung_cancer-mitoBuffa-TPM.csv") 
 ```
 
 # Read in copy number data 
@@ -72,12 +108,12 @@ orien.cna <- readxl::read_xlsx("../data/Whole ORIEN NDUFB5 Copy-Number Values.xl
   mutate(`Sample ID` = SAMPLE_ID) %>%
   #separate(`SAMPLE_ID`, into = c("Pt.id", "sample", "WES.ID"), sep = "_", fill = "right") %>%
   mutate(copy.number = `NDUFB5 Copy Number`) %>%
-  select(ORIENAvatarKey, `Sample ID`, copy.number) 
+  dplyr::select(ORIENAvatarKey, `Sample ID`, copy.number) 
 
 tcc.cna <- readxl::read_xlsx("../data/TCC00601-BENE_NDUFB5_copy-number 06022025.xlsx") %>%
   mutate(sample = slid_released,
          copy.number = as.integer(NDUFB5)) %>%
-  select(sample, copy.number) 
+  dplyr::select(sample, copy.number) 
 ```
 
 # Read in survival data
@@ -103,7 +139,7 @@ clin.clean <- pt.key %>%
                                    PatientVitalStatus == "Alive" ~ as.double(AgeAtLastContact) - as.double(AgeAtDiagnosis))) %>%
   rename(ORIENAvatarKey = `Patient ID`) %>%
   filter(!is.na(survival.time)) %>%
-  select(ORIENAvatarKey, `Sample ID`, sample, WES.ID, vital.status, survival.time, `Sequencing Type`, ImmunoOncologyDrug, RadiationTherapyInd) 
+  dplyr::select(ORIENAvatarKey, `Sample ID`, sample, WES.ID, vital.status, survival.time, `Sequencing Type`, ImmunoOncologyDrug, RadiationTherapyInd) 
 ```
 
 # Combine and prep data 
@@ -117,7 +153,9 @@ orien.in <- clin.clean %>%
   left_join(scores) %>%
   mutate(cna.grp = ifelse(copy.number < 2, "Deletion",
                         ifelse(copy.number == 2, "Diploid",
-                        ifelse(copy.number > 2, "Amplified", NA))))
+                        ifelse(copy.number > 2, "Amplified", NA))),
+         mito.grp = ifelse(MitoScore >= median(MitoScore, na.rm = TRUE), "High", "Low"),
+         buffa.grp = ifelse(buffa.score >= median(buffa.score, na.rm = TRUE), "High", "Low"))
 
 # 314 samples should have CNA 
 tcc.in <- clin.clean %>%
@@ -128,7 +166,9 @@ tcc.in <- clin.clean %>%
   filter(sample %in% tcc.cna$sample) %>%
   mutate(cna.grp = ifelse(copy.number < 2, "Deletion",
                         ifelse(copy.number == 2, "Diploid",
-                        ifelse(copy.number > 2, "Amplified", NA))))
+                        ifelse(copy.number > 2, "Amplified", NA))),
+                  mito.grp = ifelse(MitoScore >= median(MitoScore, na.rm = TRUE), "High", "Low"),
+         buffa.grp = ifelse(buffa.score >= median(buffa.score, na.rm = TRUE), "High", "Low"))
 ```
 
 ```{r}
@@ -191,20 +231,45 @@ tcc_plots <- generate_and_plot_km_curves(tcc.in, "tcc", group_vars, filter_vars)
 
 
 ```{r}
-# Extract the main ggplot objects from your ggsurvplot list
-plot_list <- lapply(orien_plots, function(x) x$plot)
+combine_survplot <- function(surv_obj) {
+  if (is.null(surv_obj)) return(NULL)
+  
+  plot_grid(
+    surv_obj$plot,
+    surv_obj$table + theme(plot.margin = margin(0, 0, 0, 0)), 
+    ncol = 1,
+    align = "v",
+    rel_heights = c(2, 0.8)   
+  )
+}
 
-# Arrange plots in a grid, e.g., 3 columns
-grid.arrange(grobs = plot_list, ncol = 3)
-
-# Extract the main ggplot objects from your ggsurvplot list
-plot_list <- lapply(tcc_plots, function(x) x$plot)
-
-# Arrange plots in a grid, e.g., 3 columns
-grid.arrange(grobs = plot_list, ncol = 3)
+orien_combined <- lapply(orien_plots, combine_survplot)
+tcc_combined   <- lapply(tcc_plots, combine_survplot)
 ```
 
 
+```{r}
+# Combine orien plots
+orien_grid <- grid.arrange(grobs = orien_combined, ncol = 3)
+
+ggsave(
+  filename = "../figures/orien_km_plots.png",
+  plot = orien_grid,
+  width = 20,       # inches
+  height = 15,      # inches
+  dpi = 300         # high resolution
+)
+
+tcc_grid <- grid.arrange(grobs = tcc_combined, ncol = 3)
+
+ggsave(
+  filename = "../figures/tcc_km_plots.png",
+  plot = tcc_grid,
+  width = 20,       # inches
+  height = 15,      # inches
+  dpi = 300         # high resolution
+)
+```
 
 
 
