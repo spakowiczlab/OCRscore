@@ -151,9 +151,8 @@ orien.in <- clin.clean %>%
 # include this line if you want to limit it to samples you have CNA for 
   # filter(!is.na(copy.number)) %>%
   left_join(scores) %>%
-  mutate(cna.grp = ifelse(copy.number < 2, "Deletion",
-                        ifelse(copy.number == 2, "Diploid",
-                        ifelse(copy.number > 2, "Amplified", NA))),
+  mutate(cna.grp = ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number > 2, "Amplified", NA)),
          mito.grp = ifelse(MitoScore >= median(MitoScore, na.rm = TRUE), "High", "Low"),
          buffa.grp = ifelse(buffa.score >= median(buffa.score, na.rm = TRUE), "High", "Low"))
 
@@ -164,9 +163,8 @@ tcc.in <- clin.clean %>%
   # filter(!is.na(copy.number)) %>%
   left_join(scores) %>%
   filter(sample %in% tcc.cna$sample) %>%
-  mutate(cna.grp = ifelse(copy.number < 2, "Deletion",
-                        ifelse(copy.number == 2, "Diploid",
-                        ifelse(copy.number > 2, "Amplified", NA))),
+  mutate(cna.grp = ifelse(copy.number == 2, "Diploid",
+                        ifelse(copy.number > 2, "Amplified", NA)),
                   mito.grp = ifelse(MitoScore >= median(MitoScore, na.rm = TRUE), "High", "Low"),
          buffa.grp = ifelse(buffa.score >= median(buffa.score, na.rm = TRUE), "High", "Low"))
 ```
@@ -253,7 +251,7 @@ tcc_combined   <- lapply(tcc_plots, combine_survplot)
 orien_grid <- grid.arrange(grobs = orien_combined, ncol = 3)
 
 ggsave(
-  filename = "../figures/orien_km_plots.png",
+  filename = "../figures/km-curves_orien.png",
   plot = orien_grid,
   width = 20,       # inches
   height = 15,      # inches
@@ -263,7 +261,7 @@ ggsave(
 tcc_grid <- grid.arrange(grobs = tcc_combined, ncol = 3)
 
 ggsave(
-  filename = "../figures/tcc_km_plots.png",
+  filename = "../figures/km-curves_tcc.png",
   plot = tcc_grid,
   width = 20,       # inches
   height = 15,      # inches
