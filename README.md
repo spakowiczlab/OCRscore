@@ -59,23 +59,21 @@ If you use the scoring software, also cite / acknowledge
 
 ## Locations of the manuscript figure scripts
 
-**Start here:** [`manuscript/`](manuscript/) — knit each notebook directly.
+**Start here:** [`dissemination/manuscript/`](dissemination/manuscript/) — knit each notebook directly.
 
 | Item | Script | Reproducible from repo alone? |
 |------|--------|-------------------------------|
-| Figure 1A–B | [`manuscript/figure_1.Rmd`](manuscript/figure_1.Rmd) | **Yes** — tracked tables under `manuscript/data/` |
-| Figure 4 stats | [`manuscript/figure_4.Rmd`](manuscript/figure_4.Rmd) | **Yes** — tracked Excel under `exploratory/data/` |
-| Figure 3A–C | [`manuscript/figure_3.Rmd`](manuscript/figure_3.Rmd) | Needs external TCGA / PCAWG / `many-cancers` (`paths.json`) |
-| Supplement | [`manuscript/Supplement.Rmd`](manuscript/Supplement.Rmd) | Needs external `many-cancers/` |
+| Figure 1A–B | [`dissemination/manuscript/figure_1.Rmd`](dissemination/manuscript/figure_1.Rmd) | **Yes** — tracked tables under `dissemination/manuscript/data/` |
+| Figure 4 stats | [`dissemination/manuscript/figure_4.Rmd`](dissemination/manuscript/figure_4.Rmd) | **Yes** — tracked Excel under `exploratory/data/` |
+| Figure 3A–C | [`dissemination/manuscript/figure_3.Rmd`](dissemination/manuscript/figure_3.Rmd) | Needs external TCGA / PCAWG / `many-cancers` (`paths.json`) |
+| Supplement | [`dissemination/manuscript/Supplement.Rmd`](dissemination/manuscript/Supplement.Rmd) | Needs external `many-cancers/` |
 
-Details: [`manuscript/README.md`](manuscript/README.md).
+Details: [`dissemination/manuscript/README.md`](dissemination/manuscript/README.md).
 
-### Exploratory / draft analyses
+### Exploratory analyses
 
-Everything under [`exploratory/`](exploratory/) is **not** the frozen
-manuscript pipeline. It includes earlier drafts and an archived `{targets}`
-`_targets.R` under
-[`exploratory/scripts/archive-from-manuscript/`](exploratory/scripts/archive-from-manuscript/).
+[`exploratory/`](exploratory/) holds drafts and side analyses; use
+`dissemination/manuscript/` for published panels.
 
 ---
 
@@ -83,16 +81,13 @@ manuscript pipeline. It includes earlier drafts and an archived `{targets}`
 
 ```text
 OCRscore/
-├── README.md                 ← you are here
-├── assets/                   ← hex sticker + graphical abstract
-├── paths.example.json        ← only needed for Fig 3 / Supplement
-├── manuscript/               ← figure notebooks + helpers
-│   ├── figure_1.Rmd … figure_4.Rmd, Supplement.Rmd
-│   ├── data/                 ← small tracked inputs (Fig 1)
-│   ├── R/                    ← loaders / plot helpers
-│   └── figures/
-├── exploratory/              ← drafts + archived targets pipeline
-└── dissemination/
+├── README.md
+├── assets/                      ← hex sticker + graphical abstract
+├── paths.example.json           ← only needed for Fig 3 / Supplement
+├── dissemination/
+│   ├── manuscript/              ← figure notebooks + helpers + Fig 1 data
+│   └── grants/
+└── exploratory/                 ← drafts / side analyses
 ```
 
 ---
@@ -117,7 +112,7 @@ built from those public sources.
   (e.g. `brca_tcga_pan_can_atlas_2018`, `lusc_tcga_pan_can_atlas_2018`)
 - Directory names under `tcga-expression/` are expected to start with the
   disease abbreviation before an underscore (`brca_…`, `kirc_…`, …); see
-  [`manuscript/R/loadAndFormatTCGA.R`](manuscript/R/loadAndFormatTCGA.R)
+  [`dissemination/manuscript/R/loadAndFormatTCGA.R`](dissemination/manuscript/R/loadAndFormatTCGA.R)
 - An exploratory download helper targeted the cBioPortal Datahub tarballs:
   `https://cbioportal-datahub.s3.amazonaws.com/{study}_tcga_pan_cancer_atlas_2018.tar.gz`
   ([`exploratory/scripts/download_cna_pbs.Rmd`](exploratory/scripts/download_cna_pbs.Rmd);
@@ -183,7 +178,7 @@ with gene-set suffixes such as:
 - `GOBP_MITOPHAGY…` → mitophagy
 
 Each table has at least `BUFFA_HYPOXIA_SCORE` and `AvgExpr` (sample average of
-the gene set). See [`manuscript/R/readAndFilter.R`](manuscript/R/readAndFilter.R).
+the gene set). See [`dissemination/manuscript/R/readAndFilter.R`](dissemination/manuscript/R/readAndFilter.R).
 
 **Provenance (important):**
 
@@ -234,11 +229,9 @@ with `tmesig::calculateBuffa()` from the same expression inputs, or set
 
 ## Reproducibility checklist & known blockers
 
-Scope: **`manuscript/` only** (the review pipeline). `exploratory/` is
-archival and is not required to regenerate manuscript panels.
+Scope: **`dissemination/manuscript/`** (the review pipeline).
 
-Reviewers **can** reproduce the statistical logic and plotting code in
-`manuscript/`. Full end-to-end regeneration of every panel requires the
+Reviewers **can** reproduce the statistical logic and plotting code there. Full end-to-end regeneration of every panel requires the
 external trees above (public cBioPortal downloads and/or regenerated
 `many-cancers/` summaries). Known issues:
 
@@ -253,9 +246,9 @@ external trees above (public cBioPortal downloads and/or regenerated
 
 3. **`{tmesig}` from GitHub** — needed to recalculate Buffa for PCAWG in
    Figure 3C (`calculateBuffa`). Figure 1 uses precomputed Buffa tables in
-   `manuscript/data/`.
+   `dissemination/manuscript/data/`.
 
-4. **Figure 4 schematic vs stats** — `manuscript/figure_4.Rmd` regenerates the
+4. **Figure 4 schematic vs stats** — `dissemination/manuscript/figure_4.Rmd` regenerates the
    permutation *P* values from the curated table
    [`exploratory/data/Subunit OS 11242021.xlsx`](exploratory/data/Subunit%20OS%2011242021.xlsx).
    That spreadsheet is an intentional curated input. The structural Complex

@@ -38,8 +38,10 @@ vignettes/*.pdf
 # Machine-specific path configs (use paths.example.json instead)
 paths.json
 ocrscore.json
+OCRscore.json
 mitoscore.json
 exploratory/scripts/00-paths.R
 00-paths.R
 
 .DS_Store
+Rplots.pdf

@@ -7,13 +7,13 @@ output: html_document
 Computes permutation-test *P* values for Figure 4 (core vs supernumerary ETC
 subunits × OS outcome).
 
-**Standalone** — tracked Excel only; no `{targets}` / T-drive.
+**Standalone** — tracked Excel only.
 
 ```r
 rmarkdown::render("figure_4.Rmd")
 ```
 
-Input: `../exploratory/data/Subunit OS 11242021.xlsx`
+Input: `../../exploratory/data/Subunit OS 11242021.xlsx`
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
@@ -22,7 +22,7 @@ library(readxl)
 source("R/tallyArms.R")
 source("R/make_comparison_data.R")
 
-os_file <- "../exploratory/data/Subunit OS 11242021.xlsx"
+os_file <- "../../exploratory/data/Subunit OS 11242021.xlsx"
 F4_OS_data <- read_xlsx(os_file, na = "N/A")
 original_data <- tallyArms(F4_OS_data)
 comparison_data <- make_comparison_data(F4_OS_data)

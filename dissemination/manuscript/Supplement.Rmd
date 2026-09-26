@@ -4,8 +4,8 @@ author: "OCRscore manuscript pipeline"
 output: html_document
 ---
 
-Multi-cancer supplementary panel. **No `{targets}`.** Needs `many-cancers/`
-under `data_root` (`../paths.json` from `paths.example.json`).
+Multi-cancer supplementary panel. Needs `many-cancers/` under `data_root`
+(`../../paths.json` from `../../paths.example.json`).
 
 ```r
 rmarkdown::render("Supplement.Rmd")

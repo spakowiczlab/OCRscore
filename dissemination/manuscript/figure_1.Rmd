@@ -4,19 +4,18 @@ author: "OCRscore manuscript pipeline"
 output: html_document
 ---
 
-**Standalone notebook** — does **not** require `targets`, `paths.json`, or the
-T-drive / Box expression trees.
+**Standalone notebook** — uses only tracked tables under `data/` (no T-drive /
+Box expression trees).
 
 | Panel | Input |
 |-------|-------|
-| **A** | [`data/fig1a_buffa_tcga.rds`](data/fig1a_buffa_tcga.rds) (tracked) |
-| **B** | [`data/fig1b_buffa_lung.csv`](data/fig1b_buffa_lung.csv) — add when available |
+| **A** | [`data/fig1a_buffa_tcga.rds`](data/fig1a_buffa_tcga.rds) |
+| **B** | [`data/fig1b_buffa_lung.csv`](data/fig1b_buffa_lung.csv) |
 
-From `manuscript/`:
+From `dissemination/manuscript/`:
 
 ```r
 rmarkdown::render("figure_1.Rmd")
-# or step through chunks in the IDE
 ```
 
 ```{r setup, include=FALSE}

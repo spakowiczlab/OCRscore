@@ -4,12 +4,11 @@ author: "OCRscore manuscript pipeline"
 output: html_document
 ---
 
-Panels for Figure 3 only. **No `{targets}`.** Needs a local `data_root` with
-`many-cancers/`, `tcga-expression/`, and `pancan_pcawg_2020/` (see
-`../paths.example.json`).
+Panels for Figure 3 only. Needs a local `data_root` with `many-cancers/`,
+`tcga-expression/`, and `pancan_pcawg_2020/` (see `../../paths.example.json`).
 
 ```r
-# copy ../paths.example.json → ../paths.json and set data_root, then:
+# copy ../../paths.example.json → ../../paths.json and set data_root, then:
 rmarkdown::render("figure_3.Rmd")
 ```
 
