@@ -1,6 +1,4 @@
-<table>
-<tr>
-<td width="100%">
+<img align="right" width="140" src="assets/ocrscore-hex.png" alt="OCR score hex sticker"/>
 
 # OCRscore
 
@@ -33,17 +31,6 @@ buffa <- calculateBuffa(gene_matrix, buffa.genes = inputGenes("Buffa"))
 > forward. Package function names in `{tmesig}` retain the older API for
 > compatibility.
 
-</td>
-<td width="160" valign="top" align="right">
-
-<a href="https://github.com/spakowiczlab/tmesig">
-  <img src="assets/ocrscore-hex.png" width="140" alt="OCR score hex sticker"/>
-</a>
-
-</td>
-</tr>
-</table>
-
 ## Citation
 
 Please cite the preprint:
@@ -58,13 +45,9 @@ If you use the scoring software, also cite / acknowledge
 [`spakowiczlab/tmesig`](https://github.com/spakowiczlab/tmesig)
 ([Zenodo](https://doi.org/10.5281/zenodo.5781865)).
 
----
-
 ## Graphical abstract
 
 ![Graphical abstract: Buffa hypoxia score, OCR score (OXPHOS gene expression), and their relationship in LB vs HB cancers](assets/ocrscore-graphical-abstract.png)
-
----
 
 ## Locations of the manuscript figure scripts
 
