@@ -1,6 +1,4 @@
-<img align="right" width="140" src="assets/ocrscore-hex.png" alt="OCR score hex sticker"/>
-
-# OCRscore
+# OCRscore <img src="assets/ocrscore-hex.png" align="right" width="140" alt="OCR score hex sticker"/>
 
 Code accompanying the preprint that defines and applies the **OCR score**
 (oxygen consumption / OXPHOS transcriptional score) in human tumors.
