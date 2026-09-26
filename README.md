@@ -57,9 +57,9 @@ If you use the scoring software, also cite / acknowledge
 
 ---
 
-## For reviewers: where are the manuscript figure scripts?
+## Locations of the manuscript figure scripts
 
-**Start here:** [`manuscript/`](manuscript/) — knit each notebook directly (no `{targets}`).
+**Start here:** [`manuscript/`](manuscript/) — knit each notebook directly.
 
 | Item | Script | Reproducible from repo alone? |
 |------|--------|-------------------------------|
