@@ -1,0 +1,46 @@
+---
+title: "Supplementary figure — OCR / biogenesis / mitophagy vs Buffa by cancer"
+author: "OCRscore manuscript pipeline"
+output: html_document
+---
+
+Multi-cancer supplementary panel. **No `{targets}`.** Needs `many-cancers/`
+under `data_root` (`../paths.json` from `paths.example.json`).
+
+```r
+rmarkdown::render("Supplement.Rmd")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(ggtext)
+source("R/setup_paths.R")
+source("R/readAndFilter.R")
+source("R/loadManyScores.R")
+source("R/formatForSmooth.R")
+
+paths <- setup_paths()
+plotdat_scores_for_lm <- formatForSmooth(loadManyScores(paths$many_cancers))
+```
+
+# Per-cancer linear fits (KIRC excluded)
+
+```{r supp-facet}
+plotdat_scores_for_lm %>%
+  filter(cancer != "KIRC") %>%
+  mutate(signature = ifelse(grepl("Electron", signature), "OCR score", signature)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature), method = "lm") +
+  facet_wrap(~cancer, nrow = 3) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Average Log<sub>2</sub> Expression") +
+  scale_color_viridis_d(name = "Signature") +
+  theme_bw() +
+  theme(axis.title.y = element_markdown(),
+        legend.position = "top")
+ggsave("figures/Supp_OCR-biogen-mitophagy_lm_facet.png",
+       height = 10,
+       width = 7.5)
+```

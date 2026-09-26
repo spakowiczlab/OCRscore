@@ -1,0 +1,94 @@
+---
+title: "Figure 3 — OCR score, hypoxia, and HIF targets"
+author: "OCRscore manuscript pipeline"
+output: html_document
+---
+
+Panels for Figure 3 only. **No `{targets}`.** Needs a local `data_root` with
+`many-cancers/`, `tcga-expression/`, and `pancan_pcawg_2020/` (see
+`../paths.example.json`).
+
+```r
+# copy ../paths.example.json → ../paths.json and set data_root, then:
+rmarkdown::render("figure_3.Rmd")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(ggtext)
+library(tmesig)
+source("R/setup_paths.R")
+source("R/readAndFilter.R")
+source("R/loadOCRscores.R")
+source("R/loadManyScores.R")
+source("R/formatForSmooth.R")
+source("R/loadAndFormatTCGA.R")
+source("R/loadAndFormatPCAWG.R")
+
+paths <- setup_paths()
+ocrscores <- loadOCRscores(paths$many_cancers)
+plotdat_scores_for_lm <- formatForSmooth(loadManyScores(paths$many_cancers))
+integrated_TCGA_PCAWG <- bind_rows(
+  loadAndFormatPCAWG(paths$pcawg),
+  loadAndFormatTCGA(paths$tcga)
+)
+```
+
+# Panel A — OCR score vs Buffa hypoxia score (all cancers)
+
+Linear fits are stratified by Buffa positivity (score > 0 vs ≤ 0).
+
+```{r panel-a}
+ocrscores %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = AvgExpr)) +
+  geom_point(aes(group = pos), alpha = 0.2, color = "grey") +
+  theme_bw() +
+  stat_smooth(aes(group = pos), method = "lm", color = "red", lwd = 1.5) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "OCR score")
+ggsave("figures/Fig3A_scatterplot_buffa-OCR_all_split-lm.png",
+       height = 3, width = 5)
+```
+
+# Panel B — OCR, mitochondrial biogenesis, and mitophagy in LB vs HB cancers
+
+Representative low-Buffa (LB) and high-Buffa (HB) cancer types.
+
+```{r panel-b}
+plotdat_scores_for_lm %>%
+  filter(cancer %in% c("THCA", "PRAD", "LGG", "CESC", "LUSC", "HNSC")) %>%
+  mutate(`Buffa Category` = fct_relevel(`Buffa Category`, "LB"),
+         signature = ifelse(grepl("Electron", signature), "OCR score", signature)) %>%
+  ggplot(aes(x = BUFFA_HYPOXIA_SCORE, y = score)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_smooth(aes(color = signature), method = "lm") +
+  facet_wrap(~ `Buffa Category` + cancer) +
+  labs(x = "Buffa Hypoxia Score",
+       y = "Average Log<sub>2</sub> Expression") +
+  scale_color_viridis_d(direction = -1, name = "Signature") +
+  theme_bw() +
+  theme(axis.title.y = element_markdown(),
+        legend.position = "top")
+
+ggsave("figures/Fig3B_hb-lb_3sigs_lm_facet.png",
+       height = 5,
+       width = 5)
+```
+
+# Panel C — HIF-related genes / MIR210 vs Buffa (TCGA + PCAWG)
+
+*PDK1*, *PDK3*, and *NDUFA4L2* from TCGA; *MIR210* (*hsa-miR-210-3p*) from PCAWG.
+
+```{r panel-c}
+integrated_TCGA_PCAWG %>%
+  ggplot(aes(x = buffa.score, y = log.counts)) +
+  facet_wrap(vars(Hugo_Symbol), nrow = 1) +
+  geom_point(color = "grey", alpha = 0.2) +
+  stat_smooth(method = "lm", color = "red") +
+  labs(x = "Buffa hypoxia score",
+       y = expression(paste(Log[2], "(Expression + 1)", sep = ""))) +
+  theme_bw()
+ggsave("figures/Fig3C_scatterplot_buffa-MIR210-genes_TCGA-pcawg.png",
+       height = 3, width = 5)
+```

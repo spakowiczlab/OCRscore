@@ -1,0 +1,6 @@
+{
+  "paths": {
+    "data_root": "/ABS/PATH/TO/OCRscore-data",
+    "comment": "Under data_root place (or symlink): (1) tcga-expression/ = cBioPortal TCGA PanCancer Atlas 2018; (2) pancan_pcawg_2020/ = cBioPortal pancan_pcawg_2020; (3) many-cancers/ = MaxLimitsall Buffa-vs-pathway tables; (4) tcga_normal_tissue/buffa_avgZscore.csv for Figure 1B (optional override: buffa_normal_file). Copy to paths.json."
+  }
+}

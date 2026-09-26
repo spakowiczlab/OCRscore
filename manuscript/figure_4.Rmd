@@ -1,0 +1,61 @@
+---
+title: "Figure 4 — Core vs supernumerary subunit OS enrichment"
+author: "OCRscore manuscript pipeline"
+output: html_document
+---
+
+Computes permutation-test *P* values for Figure 4 (core vs supernumerary ETC
+subunits × OS outcome).
+
+**Standalone** — tracked Excel only; no `{targets}` / T-drive.
+
+```r
+rmarkdown::render("figure_4.Rmd")
+```
+
+Input: `../exploratory/data/Subunit OS 11242021.xlsx`
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(dplyr)
+library(readxl)
+source("R/tallyArms.R")
+source("R/make_comparison_data.R")
+
+os_file <- "../exploratory/data/Subunit OS 11242021.xlsx"
+F4_OS_data <- read_xlsx(os_file, na = "N/A")
+original_data <- tallyArms(F4_OS_data)
+comparison_data <- make_comparison_data(F4_OS_data)
+```
+
+# Observed counts
+
+```{r observed}
+original_data
+```
+
+# Empirical one-sided *P* values (B = 1000 permutations)
+
+*P* = proportion of permutations with count ≥ observed count.
+
+```{r p-values}
+pval <- function(obs, null_col) {
+  sum(comparison_data[[null_col]] >= obs, na.rm = TRUE) / nrow(comparison_data)
+}
+
+results <- tibble::tribble(
+  ~category,              ~observed,                              ~p_value,
+  "Core - Positive",      original_data$Core.Positive,            pval(original_data$Core.Positive, "Core.Positive"),
+  "Core - Negative",      original_data$Core.Negative,            pval(original_data$Core.Negative, "Core.Negative"),
+  "Core - NA",            original_data$Core.NA,                  pval(original_data$Core.NA, "Core.NA"),
+  "Supernumerary - Positive", original_data$Supernumerary.Positive, pval(original_data$Supernumerary.Positive, "Supernumerary.Positive"),
+  "Supernumerary - Negative", original_data$Supernumerary.Negative, pval(original_data$Supernumerary.Negative, "Supernumerary.Negative"),
+  "Supernumerary - NA",   original_data$Supernumerary.NA,         pval(original_data$Supernumerary.NA, "Supernumerary.NA")
+)
+
+print(results)
+readr::write_csv(results, "figures/Fig4_core-supernumerary_permutation_pvalues.csv")
+```
+
+The structural Complex I/II schematic in the paper is assembled from this
+curated table outside R.

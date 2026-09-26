@@ -1,0 +1,14 @@
+# Recommended R packages for the OCRscore manuscript notebooks
+#
+# CRAN:
+tidyverse
+readxl
+ggtext
+jsonlite
+readr
+ggdist
+colorspace
+patchwork
+
+# GitHub (Figure 3 PCAWG Buffa):
+# remotes::install_github("spakowiczlab/tmesig")

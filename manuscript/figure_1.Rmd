@@ -1,0 +1,103 @@
+---
+title: "Figure 1 — Buffa hypoxia scores across cancers and lung tissues"
+author: "OCRscore manuscript pipeline"
+output: html_document
+---
+
+**Standalone notebook** — does **not** require `targets`, `paths.json`, or the
+T-drive / Box expression trees.
+
+| Panel | Input |
+|-------|-------|
+| **A** | [`data/fig1a_buffa_tcga.rds`](data/fig1a_buffa_tcga.rds) (tracked) |
+| **B** | [`data/fig1b_buffa_lung.csv`](data/fig1b_buffa_lung.csv) — add when available |
+
+From `manuscript/`:
+
+```r
+rmarkdown::render("figure_1.Rmd")
+# or step through chunks in the IDE
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(colorspace)
+library(patchwork)
+source("R/plot_buffa_raincloud.R")
+```
+
+# Panel A — Buffa across cancers (KIRC excluded)
+
+```{r panel-a}
+fig1a_dat <- readRDS("data/fig1a_buffa_tcga.rds") %>%
+  mutate(cancer = toupper(cancer)) %>%
+  filter(cancer != "KIRC") %>%
+  mutate(mean = mean(BUFFA_HYPOXIA_SCORE), .by = cancer) %>%
+  mutate(
+    group = forcats::fct_reorder(cancer, -mean),
+    score = BUFFA_HYPOXIA_SCORE
+  )
+
+p_a <- plot_buffa_raincloud(fig1a_dat)
+p_a
+ggsave("figures/Fig1A_buffa-cancer-raincloud.png", p_a, height = 7, width = 5)
+ggsave("figures/Fig1A_buffa-cancer-raincloud.svg", p_a, height = 7, width = 5)
+```
+
+# Panel B — Lung normal vs tumor
+
+Needs columns `source` and `buffa.score`. Short codes `luad` / `lusc` are
+treated as adjacent-normal; labels become “Adjacent Normal LUAD”, “Healthy
+Lung”, “LUAD”, etc.
+
+```{r panel-b}
+# Prefer the slim lung table; fall back to the full lab export if present
+fig1b_candidates <- c(
+  "data/fig1b_buffa_lung.csv",
+  "data/buffa_avgZscore.csv"
+)
+fig1b_path <- fig1b_candidates[file.exists(fig1b_candidates)][1]
+have_fig1b <- !is.na(fig1b_path)
+
+if (!have_fig1b) {
+  message(
+    "Skipping Panel B — missing data/fig1b_buffa_lung.csv ",
+    "(or data/buffa_avgZscore.csv).\n",
+    "Needed columns: source, buffa.score."
+  )
+  p_b <- NULL
+} else {
+  message("Panel B input: ", fig1b_path)
+  fig1b_dat <- read.csv(fig1b_path) %>%
+    format_lung_buffa()
+
+  p_b <- plot_buffa_raincloud(fig1b_dat)
+  print(p_b)
+  ggsave("figures/Fig1B_buffa-lung-normal-tumor-raincloud.png", p_b,
+         height = 5, width = 6)
+  ggsave("figures/Fig1B_buffa-lung-normal-tumor-raincloud.svg", p_b,
+         height = 5, width = 6)
+}
+```
+
+# Combined A + B
+
+```{r combined}
+if (is.null(p_b)) {
+  message("Skipping combined Figure 1 — Panel B not available.")
+} else {
+  p_ab <- p_a + p_b +
+    plot_layout(widths = c(1, 1)) +
+    plot_annotation(tag_levels = "A") &
+    theme(
+      text = element_text(family = "Arial", size = 8),
+      axis.title = element_text(family = "Arial", size = 8),
+      axis.text = element_text(family = "Arial", size = 8),
+      plot.tag = element_text(family = "Arial", face = "bold", size = 11)
+    )
+
+  ggsave("figures/Fig1_buffa-rainclouds.png", p_ab, height = 5, width = 6.5)
+  ggsave("figures/Fig1_buffa-rainclouds.svg", p_ab, height = 5, width = 6.5)
+}
+```
