@@ -1,6 +1,6 @@
-<a href="https://github.com/spakowiczlab/tmesig">
-  <img src="assets/ocrscore-hex.png" align="right" width="140" alt="OCR score hex sticker"/>
-</a>
+<table>
+<tr>
+<td width="100%">
 
 # OCRscore
 
@@ -33,7 +33,16 @@ buffa <- calculateBuffa(gene_matrix, buffa.genes = inputGenes("Buffa"))
 > forward. Package function names in `{tmesig}` retain the older API for
 > compatibility.
 
-<br clear="all"/>
+</td>
+<td width="160" valign="top" align="right">
+
+<a href="https://github.com/spakowiczlab/tmesig">
+  <img src="assets/ocrscore-hex.png" width="140" alt="OCR score hex sticker"/>
+</a>
+
+</td>
+</tr>
+</table>
 
 ## Citation
 
