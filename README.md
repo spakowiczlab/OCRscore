@@ -33,7 +33,7 @@ buffa <- calculateBuffa(gene_matrix, buffa.genes = inputGenes("Buffa"))
 > forward. Package function names in `{tmesig}` retain the older API for
 > compatibility.
 
----
+<br clear="all"/>
 
 ## Citation
 
