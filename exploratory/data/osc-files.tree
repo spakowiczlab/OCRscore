@@ -1,0 +1,167 @@
+.
+├── blca_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── brca_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── cesc_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── cna_data
+│   ├── blca_data_cna.txt
+│   ├── brca_data_cna.txt
+│   ├── cesc_data_cna.txt
+│   ├── coadread_data_cna.txt
+│   ├── gbm_data_cna.txt
+│   ├── hnsc_data_cna.txt
+│   ├── kirc_data_cna.txt
+│   ├── kirp_data_cna.txt
+│   ├── lgg_data_cna.txt
+│   ├── lihc_data_cna.txt
+│   ├── luad_data_cna.txt
+│   ├── lusc_data_cna.txt
+│   ├── ov_data_cna.txt
+│   ├── paad_data_cna.txt
+│   ├── pcpg_data_cna.txt
+│   ├── prad_data_cna.txt
+│   ├── skcm_data_cna.txt
+│   ├── thca_data_cna.txt
+│   └── ucec_data_cna.txt
+├── coadread_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── gbm_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── hnsc_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── kirc_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── kirp_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── lgg_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── lihc_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── luad_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── lusc_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   ├── data_RNA_Seq_v2_expression_median.txt
+│   └── lusc_cna.pbs
+├── ov_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── paad_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── pcpg_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── prad_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── skcm_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+├── tcga_normal_tissue
+│   ├── bladder-rsem-fpkm-gtex.txt
+│   ├── blca-rsem-fpkm-tcga-t.txt
+│   ├── blca-rsem-fpkm-tcga.txt
+│   ├── brca-rsem-fpkm-tcga-t.txt
+│   ├── brca-rsem-fpkm-tcga.txt
+│   ├── breast-rsem-fpkm-gtex.txt
+│   ├── buffa_avgZscore.csv
+│   ├── cervix-rsem-fpkm-gtex.txt
+│   ├── cesc-rsem-fpkm-tcga-t.txt
+│   ├── cesc-rsem-fpkm-tcga.txt
+│   ├── chol-rsem-fpkm-tcga-t.txt
+│   ├── chol-rsem-fpkm-tcga.txt
+│   ├── coad-rsem-fpkm-tcga-t.txt
+│   ├── coad-rsem-fpkm-tcga.txt
+│   ├── colon-rsem-fpkm-gtex.txt
+│   ├── esca-rsem-fpkm-tcga-t.txt
+│   ├── esca-rsem-fpkm-tcga.txt
+│   ├── esophagus_gas-rsem-fpkm-gtex.txt
+│   ├── esophagus_muc-rsem-fpkm-gtex.txt
+│   ├── esophagus_mus-rsem-fpkm-gtex.txt
+│   ├── hnsc-rsem-fpkm-tcga-t.txt
+│   ├── hnsc-rsem-fpkm-tcga.txt
+│   ├── kich-rsem-fpkm-tcga-t.txt
+│   ├── kich-rsem-fpkm-tcga.txt
+│   ├── kidney-rsem-fpkm-gtex.txt
+│   ├── kirc-rsem-fpkm-tcga-t.txt
+│   ├── kirc-rsem-fpkm-tcga.txt
+│   ├── kirp-rsem-fpkm-tcga-t.txt
+│   ├── kirp-rsem-fpkm-tcga.txt
+│   ├── lihc-rsem-fpkm-tcga-t.txt
+│   ├── lihc-rsem-fpkm-tcga.txt
+│   ├── liver-rsem-fpkm-gtex.txt
+│   ├── luad-rsem-fpkm-tcga-t.txt
+│   ├── luad-rsem-fpkm-tcga.txt
+│   ├── lung-rsem-fpkm-gtex.txt
+│   ├── lusc-rsem-fpkm-tcga-t.txt
+│   ├── lusc-rsem-fpkm-tcga.txt
+│   ├── prad-rsem-fpkm-tcga-t.txt
+│   ├── prad-rsem-fpkm-tcga.txt
+│   ├── prostate-rsem-fpkm-gtex.txt
+│   ├── read-rsem-fpkm-tcga-t.txt
+│   ├── read-rsem-fpkm-tcga.txt
+│   ├── salivary-rsem-fpkm-gtex.txt
+│   ├── stad-rsem-fpkm-tcga-t.txt
+│   ├── stad-rsem-fpkm-tcga.txt
+│   ├── stomach-rsem-fpkm-gtex.txt
+│   ├── thca-rsem-fpkm-tcga-t.txt
+│   ├── thca-rsem-fpkm-tcga.txt
+│   ├── thyroid-rsem-fpkm-gtex.txt
+│   ├── ucec-rsem-fpkm-tcga-t.txt
+│   ├── ucec-rsem-fpkm-tcga.txt
+│   ├── ucs-rsem-fpkm-tcga-t.txt
+│   └── uterus-rsem-fpkm-gtex.txt
+├── thca_tcga_pan_can_atlas_2018
+│   ├── data_clinical_supp_hypoxia.txt
+│   └── data_RNA_Seq_v2_expression_median.txt
+└── ucec_tcga_pan_can_atlas_2018
+    ├── case_lists
+    │   ├── cases_all.txt
+    │   ├── cases_cnaseq.txt
+    │   ├── cases_cna.txt
+    │   ├── cases_complete.txt
+    │   ├── cases_log2CNA.txt
+    │   ├── cases_microbiome.txt
+    │   ├── cases_RNA_Seq_v2_mRNA.txt
+    │   ├── cases_rppa.txt
+    │   └── cases_sequenced.txt
+    ├── data_clinical_supp_hypoxia.txt
+    ├── data_cna_hg19.seg
+    ├── data_CNA.txt
+    ├── data_fusions.txt
+    ├── data_mutations_mskcc.txt
+    ├── data_RNA_Seq_v2_expression_median.txt
+    ├── data_RNA_Seq_v2_mRNA_median_all_sample_Zscores.txt
+    ├── data_RNA_Seq_v2_mRNA_median_normals.txt
+    ├── data_RNA_Seq_v2_mRNA_median_Zscores.txt
+    ├── data_rppa_Zscores.txt
+    ├── LICENSE
+    ├── meta_clinical_patient.txt
+    ├── meta_clinical_sample.txt
+    ├── meta_cna_hg19_seg.txt
+    ├── meta_CNA.txt
+    ├── meta_fusions.txt
+    ├── meta_log2CNA.txt
+    ├── meta_microbiome.txt
+    ├── meta_RNA_Seq_v2_expression_median.txt
+    ├── meta_RNA_Seq_v2_mRNA_median_all_sample_ref_normal_Zscores.txt
+    ├── meta_RNA_Seq_v2_mRNA_median_normals.txt
+    ├── meta_RNA_Seq_v2_mRNA_median_Zscores_normals.txt
+    ├── meta_RNA_Seq_v2_mRNA_median_Zscores.txt
+    └── meta_rppa_Zscores.txt
+
+22 directories, 142 files
